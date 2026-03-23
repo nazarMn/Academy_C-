@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="uk" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>C++ Академія — Навчись C++ з нуля до Pro</title>
+  <meta name="description" content="Інтерактивна платформа для вивчення C++ українською мовою. Від новачка до впевненого розробника з ООП." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+
+  <!-- Monaco Editor AMD Loader -->
+  <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
+</head>
+<body>
+
+  <!-- SIDEBAR NAV -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">⚡</div>
+      <span class="brand-name">C++ Академія</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="#home" class="nav-link" data-page="home">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">Головна</span>
+      </a>
+      <a href="#lessons" class="nav-link" data-page="lessons">
+        <span class="nav-icon">📚</span>
+        <span class="nav-label">Уроки</span>
+      </a>
+      <a href="#practice" class="nav-link" data-page="practice">
+        <span class="nav-icon">💻</span>
+        <span class="nav-label">Практика</span>
+      </a>
+      <a href="#quizzes" class="nav-link" data-page="quizzes">
+        <span class="nav-icon">🧠</span>
+        <span class="nav-label">Тести</span>
+      </a>
+      <a href="#projects" class="nav-link" data-page="projects">
+        <span class="nav-icon">🚀</span>
+        <span class="nav-label">Проєкти</span>
+      </a>
+      <a href="#dashboard" class="nav-link" data-page="dashboard">
+        <span class="nav-icon">🏆</span>
+        <span class="nav-label">Прогрес</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <button class="theme-toggle" id="themeToggle" aria-label="Змінити тему">
+        <span class="theme-icon-dark">🌙</span>
+        <span class="theme-icon-light">☀️</span>
+        <span class="theme-label">Тема</span>
+      </button>
+      <div class="sidebar-xp" id="sidebarXP">
+        <div class="xp-label">XP: <span id="sidebarXPValue">0</span></div>
+        <div class="xp-mini-bar"><div class="xp-mini-fill" id="sidebarXPFill"></div></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MOBILE TOP BAR -->
+  <header class="mobile-header">
+    <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+    <span class="mobile-brand">⚡ C++ Академія</span>
+    <button class="theme-toggle-mobile" id="themeToggleMobile">🌙</button>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="app">
+    <!-- Pages render here -->
+    <div class="page-loader" id="pageLoader">
+      <div class="loader-spinner"></div>
+    </div>
+  </main>
+
+  <!-- TOAST NOTIFICATIONS -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- XP POPUP -->
+  <div class="xp-popup" id="xpPopup"></div>
+
+  <!-- MOBILE NAV OVERLAY -->
+  <div class="mobile-overlay" id="mobileOverlay"></div>
+
+  <!-- JS MODULES -->
+  <script src="js/sanitizer.js"></script>
+  <script src="js/data/lessons.js"></script>
+  <script src="js/data/quizzes.js"></script>
+  <script src="js/data/projects.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/editor.js"></script>
+  <script src="js/pages/home.js"></script>
+  <script src="js/pages/lessons.js"></script>
+  <script src="js/pages/lesson-detail.js"></script>
+  <script src="js/pages/practice.js"></script>
+  <script src="js/pages/quizzes.js"></script>
+  <script src="js/pages/projects.js"></script>
+  <script src="js/pages/dashboard.js"></script>
+  <script src="js/router.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
