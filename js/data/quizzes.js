@@ -91,7 +91,7 @@ window.QUIZZES_DATA = [
       },
     ],
   },
-  
+
   {
     id: 'quiz_pointers',
     title: 'Покажчики та памʼять',
