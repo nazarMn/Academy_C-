@@ -1782,4 +1782,286 @@ int main() {
         hint: 'Просто дослівно відтворіть цей блок.',
     },
 
+    // ====================================================================
+    // НОВИЙ УРОК: Комплексний урок — Динамічна пам'ять + ООП + Оператори
+    // Вставляти в масив window.LESSONS_DATA у файлі js/data/lessons.js
+    // ====================================================================
+
+    {
+        id: 'advanced_class_design',
+        title: 'Комплексний клас: Пам\'ять, Геттери, Оператори',
+        level: 'oop',
+        xp: 65,
+        levelLabel: 'ООП (Гуру)',
+        icon: '⚗️',
+        videos: [],
+        explanation: `<h3>1. Навіщо об'єднувати все це разом?</h3>
+<p>До цього ми вивчали: динамічну пам'ять (<code>new</code>/<code>delete</code>), інкапсуляцію та геттери/сеттери, перевантаження арифметичних операторів (<code>+</code>, <code>==</code>), та перевантаження оператора виводу (<code>&lt;&lt;</code>). На практиці ці інструменти рідко зустрічаються окремо. Справжній клас промислового рівня поєднує їх усі одночасно.</p>
+<p>У цьому уроці ми побудуємо клас <strong>DynamicArray</strong> — власний мінімалістичний аналог <code>std::vector</code>. Він зберігатиме масив цілих чисел у динамічній пам'яті на Купі (Heap), матиме правильний захист даних через <code>private</code>, геттери для безпечного читання, та "навчений" виводити себе через <code>cout</code> і додаватись до інших масивів через <code>+</code>.</p>
+
+<h3>2. Архітектура класу (Що всередині)</h3>
+<p>Наш клас <code>DynamicArray</code> матиме три приватних поля:</p>
+<ul>
+  <li><code>int* data</code> — покажчик на масив в динамічній пам'яті (Купі).</li>
+  <li><code>int size</code> — поточна кількість елементів у масиві.</li>
+  <li><code>int capacity</code> — скільки місця ЗАРЕЗЕРВОВАНО (може бути більше ніж <code>size</code>).</li>
+</ul>
+<p>Цей розподіл між <em>розміром</em> та <em>ємністю</em> — це точна модель того, як реально працює <code>std::vector</code> всередині!</p>
+
+<h3>3. Правило Трьох (Rule of Three)</h3>
+<p>Коли клас самостійно керує динамічною пам'яттю (<code>new</code>/<code>delete</code>), він зобов'язаний реалізувати <strong>три спеціальних методи</strong>, інакше виникнуть важковловимі баги:</p>
+<ol>
+  <li>⚙️ <strong>Деструктор (<code>~DynamicArray()</code>)</strong> — звільняє пам'ять при знищенні об'єкта. Без нього — витік пам'яті назавжди.</li>
+  <li>📋 <strong>Конструктор копіювання (<code>DynamicArray(const DynamicArray&)</code>)</strong> — якщо хтось пише <code>DynamicArray b = a;</code>, треба <strong>повністю скопіювати вміст</strong> масиву у нову пам'ять. Без нього обидва об'єкти вказуватимуть на ОДИН масив, і перший <code>delete[]</code> зруйнує його для обох — це так звана <em>"Дрібна копія" (Shallow Copy)</em>.</li>
+  <li>✏️ <strong>Оператор присвоєння (<code>operator=</code>)</strong> — аналогічно для виразу <code>b = a;</code> (коли обидва вже існують).</li>
+</ol>
+<div class="note-box">
+  💡 <strong>Глибока копія (Deep Copy):</strong> Коли ми самостійно виділяємо НОВИЙ блок пам'яті і переписуємо туди кожен елемент — це і є правильна, безпечна глибока копія. Ніякого спільного <code>data</code>-покажчика між двома об'єктами!
+</div>
+
+<h3>4. Перевантаження <code>operator+</code> для масивів</h3>
+<p>Ми навчимо клас "склеювати" два масиви через <code>+</code>. Результатом буде новий, третій масив, що містить елементи обох. Для цього потрібно:</p>
+<ol>
+  <li>Виділити нову динамічну пам'ять розміром <code>size1 + size2</code>.</li>
+  <li>Скопіювати елементи першого масиву, потім другого.</li>
+  <li>Повернути новий об'єкт.</li>
+</ol>
+
+<h3>5. Перевантаження <code>operator==</code> та <code>operator[]</code></h3>
+<p><code>operator[]</code> — один з найцікавіших операторів. Він дозволяє використовувати звичний синтаксис <code>arr[i]</code> для звернення до елементів. У нашому сеттері ми додамо перевірку меж (bound checking), якої бракує у вбудованих масивах C++!</p>
+<p>Оператор <code>[]</code> повертає <strong>посилання</strong> (<code>int&</code>), тому до результату можна і читати і писати: <code>arr[2] = 99;</code></p>
+
+<h3>6. Перевантаження <code>operator&lt;&lt;</code> (friend)</h3>
+<p>Як ми вже вивчали — щоб <code>cout &lt;&lt; arr</code> працювало, потрібна <code>friend</code>-функція. Вона матиме доступ до приватних <code>data</code> та <code>size</code> і виведе весь вміст масиву у форматі <code>[1, 2, 3]</code>.</p>`,
+
+        code: `#include <iostream>
+#include <stdexcept> // Для out_of_range
+using namespace std;
+
+class DynamicArray {
+private:
+    int* data;     // Покажчик на масив у Купі (Heap)
+    int  size;     // Кількість елементів зараз
+    int  capacity; // Зарезервовано місця
+
+    // ---- Внутрішній службовий метод ----
+    void allocate(int cap) {
+        capacity = cap;
+        data = new int[capacity](); // () в кінці обнуляє всі комірки
+    }
+
+public:
+    // ============================================================
+    //  КОНСТРУКТОРИ
+    // ============================================================
+
+    // Конструктор за замовчуванням
+    DynamicArray() : size(0), capacity(0), data(nullptr) {}
+
+    // Конструктор з початковою ємністю
+    explicit DynamicArray(int cap) : size(0) {
+        allocate(cap);
+    }
+
+    // Конструктор з масиву (зручна ініціалізація)
+    DynamicArray(int* arr, int len) : size(len) {
+        allocate(len);
+        for (int i = 0; i < len; i++)
+            data[i] = arr[i];
+    }
+
+    // ============================================================
+    //  ПРАВИЛО ТРЬОХ
+    // ============================================================
+
+    // 1. Деструктор — обов'язково звільняємо пам'ять
+    ~DynamicArray() {
+        delete[] data;  // delete[] для масивів!
+        data = nullptr;
+    }
+
+    // 2. Конструктор глибокого копіювання
+    DynamicArray(const DynamicArray& other) : size(other.size) {
+        allocate(other.capacity);
+        for (int i = 0; i < size; i++)
+            data[i] = other.data[i];
+    }
+
+    // 3. Оператор присвоєння (глибоке копіювання)
+    DynamicArray& operator=(const DynamicArray& other) {
+        if (this == &other) return *this; // Захист від self-assignment: a = a
+        delete[] data;                    // Спочатку звільняємо СТАРІ дані
+        size = other.size;
+        allocate(other.capacity);
+        for (int i = 0; i < size; i++)
+            data[i] = other.data[i];
+        return *this;
+    }
+
+    // ============================================================
+    //  ГЕТТЕРИ (Публічний читальний інтерфейс)
+    // ============================================================
+
+    int getSize()     const { return size; }
+    int getCapacity() const { return capacity; }
+    bool isEmpty()    const { return size == 0; }
+
+    // ============================================================
+    //  СЕТТЕРИ / МОДИФІКАТОРИ
+    // ============================================================
+
+    // Додати елемент у кінець
+    void pushBack(int value) {
+        if (size >= capacity) {
+            // Якщо місця немає — збільшуємо вдвічі (як у std::vector)
+            int newCap = (capacity == 0) ? 2 : capacity * 2;
+            int* newData = new int[newCap]();
+            for (int i = 0; i < size; i++)
+                newData[i] = data[i];
+            delete[] data;
+            data = newData;
+            capacity = newCap;
+        }
+        data[size++] = value;
+    }
+
+    // Видалити останній елемент
+    void popBack() {
+        if (isEmpty())
+            throw underflow_error("Масив вже порожній!");
+        size--;
+    }
+
+    // ============================================================
+    //  ОПЕРАТОРИ
+    // ============================================================
+
+    // operator[] із перевіркою меж (те, чого немає у звичайних масивів!)
+    int& operator[](int index) {
+        if (index < 0 || index >= size)
+            throw out_of_range("Індекс " + to_string(index) +
+                               " за межами масиву (size=" + to_string(size) + ")!");
+        return data[index]; // Повертаємо ПОСИЛАННЯ: можна і читати, і змінювати
+    }
+
+    // const-версія для читання з константних об'єктів
+    const int& operator[](int index) const {
+        if (index < 0 || index >= size)
+            throw out_of_range("Індекс " + to_string(index) + " за межами!");
+        return data[index];
+    }
+
+    // operator+ — "склеює" два масиви в новий третій
+    DynamicArray operator+(const DynamicArray& other) const {
+        DynamicArray result(size + other.size);
+        for (int i = 0; i < size; i++)
+            result.pushBack(data[i]);
+        for (int i = 0; i < other.size; i++)
+            result.pushBack(other.data[i]);
+        return result; // Конструктор копіювання подбає про безпечний повернення
+    }
+
+    // operator== — масиви рівні, якщо однаковий розмір та всі елементи збігаються
+    bool operator==(const DynamicArray& other) const {
+        if (size != other.size) return false;
+        for (int i = 0; i < size; i++)
+            if (data[i] != other.data[i]) return false;
+        return true;
+    }
+
+    bool operator!=(const DynamicArray& other) const {
+        return !(*this == other);
+    }
+
+    // ============================================================
+    //  friend operator<< — вивід через cout
+    // ============================================================
+    friend ostream& operator<<(ostream& out, const DynamicArray& arr) {
+        out << "[";
+        for (int i = 0; i < arr.size; i++) {
+            out << arr.data[i];
+            if (i < arr.size - 1) out << ", ";
+        }
+        out << "] (size=" << arr.size
+            << ", capacity=" << arr.capacity << ")";
+        return out; // Повертаємо потік для ланцюгування << << <<
+    }
+};
+
+// ============================================================
+//  MAIN — демонстрація всього разом
+// ============================================================
+int main() {
+    cout << "===== 1. Створення та pushBack =====" << endl;
+    DynamicArray a;
+    a.pushBack(10);
+    a.pushBack(20);
+    a.pushBack(30);
+    cout << "Масив a: " << a << endl;
+
+    cout << "\n===== 2. operator[] — читання та запис =====" << endl;
+    cout << "a[1] = " << a[1] << endl;
+    a[1] = 99;  // Змінюємо через перевантажений []
+    cout << "Після a[1]=99: " << a << endl;
+
+    cout << "\n===== 3. Глибоке копіювання (Конструктор копії) =====" << endl;
+    DynamicArray b = a;   // Викличе конструктор копіювання
+    b[0] = 777;           // Змінюємо b — a НЕ має змінитись!
+    cout << "b (змінений): " << b << endl;
+    cout << "a (оригінал): " << a << endl;
+
+    cout << "\n===== 4. operator+ — склейка двох масивів =====" << endl;
+    DynamicArray c;
+    c.pushBack(100);
+    c.pushBack(200);
+    DynamicArray d = a + c;  // Всі елементи a, потім усі c
+    cout << "a + c = " << d << endl;
+
+    cout << "\n===== 5. operator== та operator!= =====" << endl;
+    DynamicArray e = a; // Копія a
+    cout << "a == e? " << (a == e ? "Так" : "Ні") << endl;
+    cout << "a != c? " << (a != c ? "Так" : "Ні") << endl;
+
+    cout << "\n===== 6. Геттери =====" << endl;
+    cout << "Розмір d: "    << d.getSize()     << endl;
+    cout << "Ємність d: "   << d.getCapacity() << endl;
+    cout << "d порожній? "  << (d.isEmpty() ? "Так" : "Ні") << endl;
+
+    cout << "\n===== 7. Безпечна перевірка меж (out_of_range) =====" << endl;
+    try {
+        cout << a[99] << endl; // Це кине виняток!
+    } catch (const out_of_range& ex) {
+        cout << "[ПЕРЕХОПЛЕНО] " << ex.what() << endl;
+    }
+
+    cout << "\n===== 8. popBack та underflow =====" << endl;
+    DynamicArray tiny;
+    try {
+        tiny.popBack(); // Масив пустий — кине underflow_error
+    } catch (const underflow_error& ex) {
+        cout << "[ПЕРЕХОПЛЕНО] " << ex.what() << endl;
+    }
+
+    // Деструктори ~DynamicArray() спрацюють автоматично для a,b,c,d,e,tiny
+    cout << "\nПам'ять звільнено автоматично. Програма завершена." << endl;
+    return 0;
+}`,
+
+        codeExplanation: [
+            "`int* data; int size; int capacity;` — всі три поля `private`. Ніхто ззовні не може написати `arr.data = nullptr;` і зламати клас.",
+            "`allocate(cap)` — службовий внутрішній метод, що викликає `new int[cap]()`. Дужки `()` в кінці обнуляють усі комірки — корисна звичка проти \"сміття\".",
+            "`~DynamicArray() { delete[] data; }` — без цього кожне знищення об'єкта залишатиме блок пам'яті на Купі назавжди (Memory Leak).",
+            "Конструктор копії: `DynamicArray(const DynamicArray& other)` виділяє НОВУ пам'ять і копіює туди кожен елемент. Якщо цього не зробити, обидва об'єкти share один `data*` — і перший `delete[]` зруйнує масив для обох (Shallow Copy bug).",
+            "В `operator=` перший рядок `if (this == &other) return *this;` — це захист від `a = a`. Без нього ми б спочатку видалили `data`, а потім намагалися скопіювати з вже знищеної пам'яті.",
+            "`pushBack` реалізує стратегію подвоєння ємності (capacity×2). Це амортизована O(1) складність — точнісінько як у `std::vector`.",
+            "`int& operator[](int index)` повертає **посилання**, тому `arr[2] = 99;` реально змінює елемент у масиві. Без `&` це була б лише копія значення.",
+            "`operator+` конструює новий `DynamicArray result(size + other.size)` і поступово наповнює його через `pushBack`. Оригінали `a` та `c` залишаються незміненими.",
+            "`friend ostream& operator<<` має доступ до `private`-полів `arr.data` та `arr.size`. Повернення `out` за посиланням дозволяє `cout << a << b << endl;` в одному рядку."
+        ],
+
+        practiceTask: 'Створіть два об\'єкти DynamicArray: перший з числами {5, 10, 15}, другий з {20, 25}. Склейте їх через operator+ у третій масив і виведіть його через cout. Потім змініть перший елемент результату через operator[] і виведіть знову.',
+        expectedOutput: '[5, 10, 15, 20, 25] (size=5, capacity=8)\n[999, 10, 15, 20, 25] (size=5, capacity=8)',
+        hint: 'DynamicArray a, b, c; a.pushBack(5)... b.pushBack(20)... c = a + b; cout << c; c[0] = 999; cout << endl << c;',
+    },
+
 ];

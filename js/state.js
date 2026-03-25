@@ -133,9 +133,18 @@ const State = (() => {
   }
 
   function isLessonLocked(index) {
-    // Перший урок завжди доступний, інші — якщо попередній пройдено
+    // Перший урок завжди доступний
     if (index === 0) return false;
+    
     const lessons = window.LESSONS_DATA || [];
+    const currentId = lessons[index]?.id;
+    
+    // Якщо урок вже пройдено — він ніколи не буде заблокованим, навіть якщо перед ним з'явився новий
+    if (currentId && _state.completedLessons.includes(currentId)) {
+      return false;
+    }
+    
+    // Інакше перевіряємо, чи пройдено попередній урок
     const prevId = lessons[index - 1]?.id;
     return prevId && !_state.completedLessons.includes(prevId);
   }
