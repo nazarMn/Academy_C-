@@ -64,7 +64,7 @@ function cleanup(dir) {
  */
 function compile(srcFile, binFile) {
   return new Promise((resolve) => {
-const args = [srcFile, '-o', binFile, '-std=c++17'];
+ const args = [srcFile, '-o', binFile, '-std=c++17', '-O2', '-Wall', '-Wextra'];
 
     // On Linux, add security flags
     if (!isWindows) {
