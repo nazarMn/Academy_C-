@@ -1,0 +1,20 @@
+{
+  "id": "oop_operator_io",
+  "title": "Перевантаження Вводу/Виводу (<<, >>) (Friend)",
+  "level": "oop",
+  "xp": 55,
+  "levelLabel": "ООП (Гуру)",
+  "icon": "🗣️",
+  "videos": [],
+  "explanation": "<h3>1. Проблема виводу Об'єктів</h3>\n<p>У попередньому уроці нам доводилося писати метод `show()` для виводу координат на екран: <code>pos.show();</code>. Але набагато зручніше було б писати просто <code>cout &lt;&lt; pos;</code>, як із звичайними числами! Якщо ви спробуєте зробити це без перевантаження, компілятор видасть страшну 200-рядкову помилку.</p>\n\n<h3>2. Чому оператор << особливий?</h3>\n<p>Коли ви пишете `a + b`, цей оператор належить об'єкту `a`. Але коли ви пишете `cout &lt;&lt; a`, ліворуч стоїть не ваш об'єкт `a`, а системний об'єкт `cout` (типу <code>ostream</code>)! Ви НЕ МОЖЕТЕ залізти в системний клас <code>ostream</code> і дописати туди новий метод для вашого класу.</p>\n<p>Рішення: перевантажити оператор <strong>ГЛОБАЛЬНО</strong> (не всередині класу). Але глобальні функції не бачать `private` поля... Тут і з'являється слово <code>friend</code> (друг).</p>\n\n<h3>3. Функції-Друзі (friend)</h3>\n<p>Функція-друг — це функція, яка визначається <strong>ПОЗА</strong> межами класу, але клас дає їй VIP-путівку на доступ до своїх <code>private</code> полів!</p>\n<code>\nclass Character {<br>\nprivate: int hp = 100;<br>\n&nbsp;&nbsp;&nbsp;&nbsp;// Даємо дозвіл дружній глобальній функції<br>\n&nbsp;&nbsp;&nbsp;&nbsp;friend ostream& operator<<(ostream& os, const Character& obj);<br>\n};\n</code>\n<p>Функція <code>operator&lt;&lt;</code> повертає посилання <code>ostream&</code> (той самий `cout`), щоб ви могли будувати \"ланцюжок\" виводу: <code>cout &lt;&lt; a &lt;&lt; \" txt\";</code>.</p>",
+  "code": "#include <iostream>\n#include <string>\nusing namespace std;\n\nclass Fraction {\nprivate:\n    int numerator;   // чисельник\n    int denominator; // знаменник\n\npublic:\n    Fraction(int num = 0, int den = 1) : numerator(num), denominator(den) {}\n\n    // 1. Оголошуємо оператор << ДРУГОМ класу\n    // Це НЕ метод класу. Ми просто кажемо: \"Ось ця зовнішня функція має доступ до мого private!\"\n    friend ostream& operator<<(ostream& out, const Fraction& frac);\n    \n    // 2. Оголошуємо оператор >> ДРУГОМ для читання з клавіатури через cin\n    friend istream& operator>>(istream& in, Fraction& frac);\n};\n\n// === ГЛОБАЛЬНІ ФУНКЦІЇ ЗОВНІ КЛАСУ ===\n\n// Оператор << виводить дамп нашого класу у переданий потік (out)\nostream& operator<<(ostream& out, const Fraction& frac) {\n    // Дякуючи VIP-friend доступу, можемо спокійно читати приватні frac.numerator!\n    out << frac.numerator << \"/\" << frac.denominator;\n    // Обов'язково повертати об'єкт потоку назад для ланцюгового виклику (cout << a << b;)\n    return out;\n}\n\n// Оператор >> завантажує дані З потоку в об'єкт (передача ЗМІНЮВАНОГО посилання, без const!)\nistream& operator>>(istream& in, Fraction& frac) {\n    char slash; // Фіктивна змінна для зчитування розділового знаку (слеша)\n    in >> frac.numerator >> slash >> frac.denominator;\n    return in;\n}\n\nint main() {\n    Fraction f1(3, 4);\n    \n    // Магія в дії! Виводить дроби як рідні об'єкти!\n    cout << \"Мій перший дріб: \" << f1 << endl;\n    \n    Fraction f2;\n    cout << \"Введіть дріб у форматі (Число/Число), наприклад 5/8: \";\n    cin >> f2; // Працює бездоганно!\n    \n    cout << \"Ви ввели: \" << f2 << endl;\n    cout << \"Кінець програми.\" << endl;\n\n    return 0;\n}",
+  "codeExplanation": [
+    "`friend` пишеться ВИКЛЮЧНО в тілі класу. Це сертифікат довіри до зовнішньої функції.",
+    "`ostream&` — це клас `cout`. Оператор приймає поточний потік виводу ліворуч, і об'єкт класу праворуч.",
+    "Об'єкт потоку `out` повертається за посиланням `return out`, що забезпечує безперервний виклик операторів."
+  ],
+  "practiceTask": "Зробіть для 'Player' (з private name і score) friend оператор `<<`, який виведе 'Гравець [ім'я]: [очки] xp'.",
+  "expectedOutput": "Гравець Ivan: 100 xp",
+  "hint": "friend ostream& operator<<(ostream& os, const Player& p) { os << \"Гравець \" << p.name << \": \" << p.score << \" xp\"; return os; }",
+  "order": 20
+}

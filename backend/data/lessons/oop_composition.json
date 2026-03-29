@@ -1,0 +1,19 @@
+{
+  "id": "oop_composition",
+  "title": "Композиція (Has-A)",
+  "level": "oop",
+  "xp": 50,
+  "levelLabel": "ООП (Середній)",
+  "icon": "🧩",
+  "videos": [],
+  "explanation": "<h3>1. Що таке Композиція? (Об'єкти в об'єктах)</h3>\n<p>В житті речі складаються з інших речей. Автомобіль (Car) МАЄ двигун (Engine). Геймер (Player) МАЄ зброю (Weapon). В об'єктно-орієнтованому програмуванні це називається відношенням <strong>Has-A (Має)</strong>.</p>\n<p>Замість того, щоб в класі гравця прописувати \"збройний урон\", \"збройна перезарядка\", \"назва зброї\", ми створюємо <strong>ОКРЕМИЙ КЛАС Weapon</strong>, і просто вставляємо його як приватне поле у Гравця! Вау!</p>\n\n<h3>2. Як ініціалізувати об'єкт всередині об'єкта?</h3>\n<p>Коли ви будуєте Гравця, ви мусите запустити конструктор Зброї, інакше зброя залишиться \"сміттям\". Це жорстко робиться у списку ініціалізації Гравця через двокрапку.</p>\n<code>\nclass Character {<br>\nprivate:<br>\n&nbsp;&nbsp;&nbsp;&nbsp;string name;<br>\n&nbsp;&nbsp;&nbsp;&nbsp;Weapon sword; // Використовуємо наш інший клас тут!<br>\npublic:<br>\n&nbsp;&nbsp;&nbsp;&nbsp;Character(string n, string wName, int wDamage)<br>\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: name(n), sword(wName, wDamage) { } // Викликаємо конструктор зброї<br>\n}\n</code>\n<p>Цей підхід робить код максимально гнучким. Клас Зброї можна буде дати і монстрам, і босам, і торговцям (Не повторюючи код!).</p>",
+  "code": "#include <iostream>\n#include <string>\nusing namespace std;\n\n// 1. Маленький незалежний клас. \n// Ним можна користуватись будь-де.\nclass Engine {\nprivate:\n    int horsepower;\n    string type;\npublic:\n    Engine(int hp, string t) : horsepower(hp), type(t) {\n        // Двигун створено.\n    }\n    \n    void start() const {\n        cout << \"[Двигун] ВРРРУМММ! \" << horsepower << \" конячих сил!\" << endl;\n    }\n    \n    // Геттер\n    string getType() const { return type; }\n};\n\n// 2. ВЕЛИКИЙ КЛАС.\n// Він буде МІСТИТИ у собі об'єкт Engine через композицію.\nclass Car {\nprivate:\n    string brand;\n    Engine motor; // Композиція (Car HAS A Engine)\n    \npublic:\n    // Конструктор приймає дані для самого себе, та дані ДЛЯ СВОГО ДВИГУНА.\n    // Ми ПЕРЕДАЄМО параметри мотора у `motor(...)` в стрічці ініціалізації.\n    Car(string b, int engHp, string engName)\n        : brand(b), motor(engHp, engName) \n    {\n    }\n\n    void drive() {\n        cout << \"\nВодій повертає ключ в своєму \" << brand << \"...\" << endl;\n        // Автомобіль делегує роботу своєму двигуну!\n        motor.start();\n        cout << \"Тип вашого агрегату: \" << motor.getType() << endl;\n        cout << \"Ми успішно поїхали.\" << endl;\n    }\n};\n\nint main() {\n    // Я створюю авто, але в ньому автоматично створюється справжній об'єкт Двигуна!\n    Car myCar(\"BMW M5\", 600, \"TwinTurbo V8\");\n    myCar.drive();\n    \n    Car ecoCar(\"Nissan Leaf\", 147, \"Electric EV\");\n    ecoCar.drive();\n\n    return 0;\n}",
+  "codeExplanation": [
+    "Класи `Engine` та `Car` існують роздільно, але `Car` поглинає у себе об'єкт `Engine`.",
+    "Зверніть увагу: ми маємо публікувати методи делегації `ecoCar.drive()` у машині, яка всередині запускає приватний `motor.start()`. Таким чином `motor` машини залишається захищеним і неприступним зовні!"
+  ],
+  "practiceTask": "Напишіть клас `CPU` та клас `Computer` який його включає. Делегуйте метод `process(int data)`.",
+  "expectedOutput": "[CPU] Processing data",
+  "hint": "Аналогічно Car та Engine.",
+  "order": 16
+}

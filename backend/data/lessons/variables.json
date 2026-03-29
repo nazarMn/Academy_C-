@@ -1,0 +1,31 @@
+{
+  "id": "variables",
+  "title": "Змінні та типи даних",
+  "level": "beginner",
+  "xp": 10,
+  "levelLabel": "Початківець",
+  "icon": "📦",
+  "videos": [
+    {
+      "id": "5MgT9H-y1ZU",
+      "title": "Уроки C++ для початківців / #3 – Змінні та типи даних"
+    },
+    {
+      "id": "mnJN8Rtt5A4",
+      "title": "#3 Примітивні типи даних"
+    }
+  ],
+  "explanation": "<h3>1. Що таке змінна?</h3>\n<p>Уявіть, що пам'ять комп'ютера — це величезна шафа з мільйонами пустих коробок. <strong>Змінна</strong> — це коли ми беремо одну коробку, клеїмо на неї наліпку з назвою (ім'я змінної) і визначаємо розмір цієї коробки (тип даних), щоб покласти туди певне значення (дані).</p>\n<p>В C++ ви <strong>зобов'язані</strong> вказати тип даних перед створенням змінної (строга типізація). Це дозволяє компілятору точно знати, скільки пам'яті виділити.</p>\n\n<h3>2. Базові типи даних</h3>\n<table style=\"width:100%; text-align:left; border-collapse:collapse; margin-bottom:15px;\">\n  <tr style=\"border-bottom: 2px solid #555;\">\n    <th>Тип</th><th>Призначення</th><th>Розмір</th><th>Приклад</th>\n  </tr>\n  <tr><td><code>int</code></td><td>Цілі числа (від -2 млрд до +2 млрд)</td><td>4 байти</td><td><code>int age = 25;</code></td></tr>\n  <tr><td><code>double</code></td><td>Дробові числа (з подвійною точністю)</td><td>8 байт</td><td><code>double pi = 3.14159;</code></td></tr>\n  <tr><td><code>float</code></td><td>Дробові числа (з одинарною точністю)</td><td>4 байти</td><td><code>float price = 9.99f;</code></td></tr>\n  <tr><td><code>char</code></td><td>Один символ (в одинарних лапках)</td><td>1 байт</td><td><code>char grade = 'A';</code></td></tr>\n  <tr><td><code>bool</code></td><td>Логічний тип (істина або хиба)</td><td>1 байт</td><td><code>bool isStudent = true;</code></td></tr>\n  <tr><td><code>string</code></td><td>Рядок тексту (потребує <code>#include &lt;string&gt;</code>)</td><td>Динамічний</td><td><code>string name = \"John\";</code></td></tr>\n</table>\n\n<h3>3. Іменування змінних</h3>\n<p>В C++ є правила та найкращі практики іменування (Best Practices):</p>\n<ul>\n  <li>🟢 Можна використовувати букви, цифри та нижнє підкреслення <code>_</code>.</li>\n  <li>🔴 <strong>НЕ</strong> можна починати з цифри (<code>1player</code> — помилка).</li>\n  <li>🔴 <strong>НЕ</strong> можна використовувати пробіли або спецсимволи (<code>my age</code>, <code>my-age</code> — помилки).</li>\n  <li>⭐ Найпопулярніший стиль в C++ — <strong>camelCase</strong> (наприклад: <code>playerScore</code>, <code>maxHealth</code>, <code>isGameOver</code>).</li>\n</ul>\n\n<h3>4. Константи (const)</h3>\n<p>Якщо ви знаєте, що значення ніколи не зміниться протягом роботи програми, завжди робіть змінну константою за допомогою ключового слова <code>const</code>. Це убезпечить код від випадкових переписувань та може пришвидшити роботу програми.</p>\n<code>const double PI = 3.14159;</code>\n<p>Якщо спробувати зробити <code>PI = 3;</code>, компілятор видасть помилку.</p>\n",
+  "code": "#include <iostream>\n#include <string>  // Для типу string\nusing namespace std;\n\nint main() {\n    // Оголошення та ініціалізація\n    int age = 20;\n    double height = 1.75;\n    char grade = 'A';\n    bool isStudent = true; // true(1) або false(0)\n    string name = \"Олександр\";\n    \n    // Зміна значення змінної\n    age = 21; // Тепер вік 21\n\n    const int DAYS_IN_WEEK = 7; // Константа, змінити не можна\n\n    // Вивід змінних\n    cout << \"Ім'я: \" << name << endl;\n    cout << \"Вік: \" << age << endl;\n    cout << \"Зріст: \" << height << \" м\" << endl;\n    cout << \"Студент? \" << isStudent << \" (1 означає так)\" << endl;\n\n    return 0;\n}",
+  "codeExplanation": [
+    "Кожна змінна оголошується як: `тип назва = значення;`",
+    "`int` зберігає цілі числа, `double` — дробові.",
+    "`string` зберігає текст у подвійних лапках, а `char` один символ в одинарних `''`.",
+    "`const` робить змінну незмінною.",
+    "Змінним можна задавати нове значення просто написавши `age = 21;` (вже без вказування типу)."
+  ],
+  "practiceTask": "Створіть змінні: ім'я (string), вік (int), бал (double). Виведіть їх кожну з нового рядка.",
+  "expectedOutput": "Марія\n19\n4.75",
+  "hint": "Не забудьте #include <string> на початку.",
+  "order": 2
+}

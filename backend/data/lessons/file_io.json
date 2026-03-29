@@ -1,0 +1,25 @@
+{
+  "id": "file_io",
+  "title": "Робота з файлами",
+  "level": "intermediate",
+  "xp": 30,
+  "levelLabel": "Середній",
+  "icon": "📁",
+  "videos": [
+    {
+      "id": "eBBjRdCE4KA",
+      "title": "C++ ⦁ Урок 15 ⦁ Використання файлової системи - ifstream"
+    }
+  ],
+  "explanation": "<h3>1. Бібліотека &lt;fstream&gt;</h3>\n<p>Для роботи з файловими системами в C++ використовується стандартна бібліотека <code>&lt;fstream&gt;</code> (File Stream). Аналогічно до <code>cout</code> та <code>cin</code>, ми працюємо з потоками даних, але тепер вони підключені не до екрану комп'ютера, а до файлу на жорсткому диску.</p>\n\n<h3>2. Три кити файлів</h3>\n<ul>\n  <li><code>ofstream</code> (Output File Stream) — Потік для <strong>запису</strong> (створення) у файл.</li>\n  <li><code>ifstream</code> (Input File Stream) — Потік для <strong>читання</strong> файлу.</li>\n  <li><code>fstream</code> — Універсальний потік, який може і читати, і писати водночас.</li>\n</ul>\n\n<h3>3. Запис у файл</h3>\n<p>Коли ви відкриваєте файл через <code>ofstream</code>, якщо файлу немає, він <strong>буде створений</strong>. Якщо він вже існує — його попередній вміст буде повністю стертий і переписаний новим! (Щоб цьогоникнути, треба використовувати спеціальний режим додавання <code>ios::app</code> - Append).</p>\n<code>\nofstream file(\"data.txt\");<br>\nfile << \"Hello File\" << endl;<br>\nfile.close();  // ЗАКРИТТЯ! Золоте правило.\n</code>\n\n<h3>4. Читання тексту (З уникненням помилок)</h3>\n<p>Зчитувати дані з файлу можна по одному слову через <code>&gt;&gt;</code> або по цілому рядку в циклі <code>while (getline(файл, змінна))</code>. Це найбезпечніший спосіб читати до самого останнього символу (кінця файлу).</p>\n\n<div class=\"note-box\">\n  ⚠️ <strong>Важливо:</strong> Файли не завжди відкриваються. Може не вистачити прав адміністратора, диск може бути пошкодженим або назва файлу написана з помилкою. ЗАВЖДИ перевіряйте стан потоку методом <code>if (!file.is_open()) { ... }</code>.\n</div>",
+  "code": "#include <iostream>\n#include <fstream>\n#include <string>\nusing namespace std;\n\nint main() {\n    // ================= 1. ЗАПИС У ФАЙЛ =================\n    // Створюємо потік виводу. Файл створиться автоматично (в папці з програмою)\n    ofstream outFile(\"players.txt\");\n    \n    // Перевірка на успіх\n    if (!outFile.is_open()) {\n        cout << \"Помилка! Диск пошкоджено або немає прав.\" << endl;\n        return 1; // Код помилки операційній системі\n    }\n\n    // Пишемо за допомогою того самого оператора <<\n    outFile << \"Scorpion_Subzero 500\" << endl;\n    outFile << \"Raiden_God 900\" << endl;\n    \n    outFile.close(); // ЗНИЩИТИ потік, розблокувати файл для Windows!\n    cout << \"[Файл успішно записано]\n\n\";\n\n    // ================= 2. ЧИТАННЯ З ФАЙЛУ =================\n    ifstream inFile(\"players.txt\");\n    \n    if (!inFile.is_open()) {\n        cout << \"Файл не знайдено!\" << endl;\n        return 1;\n    }\n\n    cout << \"--- Вміст файлу ---\" << endl;\n    string line;\n    // getline читає по одному РЯДКУ і повертає ПРАВДУ поки не кінець файлу (EOF)\n    while (getline(inFile, line)) {\n        cout << \"Прочитано рядок: \" << line << endl;\n    }\n\n    inFile.close(); // Не забуваємо закривати\n\n    return 0;\n}",
+  "codeExplanation": [
+    "`ofstream outFile(\"players.txt\")` намагається відкрити файл. За замовчуванням зітре старе наповнення.",
+    "`!outFile.is_open()` — дуже важлива перевірка. Ніколи не припускайте, що файл є ідеально готовим до запису.",
+    "`while (getline(inFile, line))` висмоктує файл рядок за рядком, аж поки останній рядок не поверне статус False (показуючи, що досягнуто кінця файлу EOF)."
+  ],
+  "practiceTask": "Запишіть своє Ім'я стрічкою через ofstream. А потім закрийте, відкрийте через ifstream і виведіть на екран.",
+  "expectedOutput": "Ваше Ім'я",
+  "hint": "Два етапи: 1) ofstream out(\"t.txt\"); out<< \"Ім'я\"; out.close(); 2) ifstream in(\"t.txt\"); getline(in, str); cout << str;",
+  "order": 10
+}

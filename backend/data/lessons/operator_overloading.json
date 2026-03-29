@@ -1,0 +1,29 @@
+{
+  "id": "operator_overloading",
+  "title": "Перевантаження операторів (+, ==)",
+  "level": "oop",
+  "xp": 50,
+  "levelLabel": "ООП (Гуру)",
+  "icon": "➕",
+  "videos": [
+    {
+      "id": "3yYFear-5HA",
+      "title": "Урок 19 ⦁ Перевантаження операторів"
+    },
+    {
+      "id": "SkxOfIdkKrg",
+      "title": "#44 Перевантаження операторів"
+    }
+  ],
+  "explanation": "<h3>1. Що таке Перевантаження операторів?</h3>\n<p>В C++ ви можете працювати з об'єктами так само легко, як із числами!\nКоли ви пишете <code>5 + 3</code>, компілятор знає що робити. Але якщо ви створите клас <code>Vector2(x, y)</code> і спробуєте <code>v1 + v2</code>, компілятор скаже: <em>\"Я не знаю як додавати Вектори!\"</em>.</p>\n<p>Перевантаження вчить ваші класи розуміти оператори <code>+</code>, <code>-</code>, <code>&gt;</code>, <code>==</code>, <code>++</code> тощо.</p>\n\n<h3>2. Синтаксис перевантаження</h3>\n<p>Спеціальне ключове слово <code>operator</code>. Фактично це звичайна функція, яка повертає новий об'єкт.</p>\n<code>\nVector2 operator+(const Vector2& other) {<br>\n&nbsp;&nbsp;&nbsp;&nbsp;// Логіка: мій `x` додати інший `other.x`<br>\n&nbsp;&nbsp;&nbsp;&nbsp;return Vector2(x + other.x, y + other.y);<br>\n}\n</code>\n<div class=\"note-box\">\n  💡 <strong>Що таке `const Vector2& other`?</strong> Це передача за посиланням (щоб не копіювати весь важкий об'єкт) із забороною зміни (`const`). Це еталон стилю в C++.\n</div>\n\n<h3>3. Оператор порівняння (==)</h3>\n<p>Ви можете перевантажити `==`, щоб навчити програму перевіряти, чи однакові два предмети в інвентарі (якщо в них збігаються ID наприклад, або Характеристики). Він повертає <code>bool</code>.</p>\n<code>\nbool operator==(const Item& i) {<br>\n&nbsp;&nbsp;&nbsp;&nbsp;return this->price == i.price;<br>\n}\n</code>",
+  "code": "#include <iostream>\nusing namespace std;\n\nclass Vector2 {\npublic:\n    double x;\n    double y;\n\n    // Конструктор\n    Vector2(double x_val = 0, double y_val = 0) : x(x_val), y(y_val) {}\n\n    // --- ПЕРЕВАНТАЖЕННЯ ОПЕРАТОРА ДОДАВАННЯ (+) ---\n    // Метод приймає ПРАВУ частину (b) у виразі (a + b)\n    Vector2 operator+(const Vector2& rightsS) const {\n        return Vector2(this->x + rightsS.x, this->y + rightsS.y);\n    }\n    \n    // --- ПЕРЕВАНТАЖЕННЯ ВІДНІМАННЯ (-) ---\n    Vector2 operator-(const Vector2& r) const {\n        return Vector2(this->x - r.x, this->y - r.y);\n    }\n\n    // --- ПЕРЕВАНТАЖЕННЯ ПОРІВНЯННЯ (==) ---\n    bool operator==(const Vector2& r) const {\n        // Вважаємо їх однаковими, якщо координати повністю ідентичні\n        if (this->x == r.x && this->y == r.y) return true;\n        return false;\n    }\n\n    void show() const {\n        cout << \"(\" << x << \"; \" << y << \")\" << endl;\n    }\n};\n\nint main() {\n    Vector2 pos1(10, 20); // Поточна позиція гравця\n    Vector2 move(5, -2);  // Вектор руху (швидкість)\n\n    cout << \"Старт гравця: \"; pos1.show();\n    cout << \"Дія: додаємо рух + (5; -2).\" << endl;\n\n    // 🏆 МАГІЯ! Додаємо два об'єкти мовби це прості числа!\n    // Під капотом це викликає pos1.operator+(move)\n    Vector2 result = pos1 + move; \n\n    cout << \"Нова позиція: \"; result.show();\n\n    // Порівняння ==\n    Vector2 vA(5, 5);\n    Vector2 vB(5, 5);\n    Vector2 vC(0, 0);\n\n    if (vA == vB) cout << \"vA та vB ідентичні!\" << endl;\n    if (!(vA == vC)) cout << \"vA та vC різні!\" << endl;\n\n    return 0;\n}",
+  "codeExplanation": [
+    "`Vector2 operator+(const Vector2& rightsS) const` — це декларація. `Vector2` (перше слово) вказує, що оператор породить НОВИЙ вектор як результат.",
+    "`this->x + rightsS.x` бере локальний (лівий) X та додає йому правий переданий X. Робить те саме з Y і конструює новий об'єкт `Vector2(x, y)` на повернення.",
+    "З операторами код стає в 10 разів більш читабельним у фізичних та ігрових рушіях."
+  ],
+  "practiceTask": "Навчіть клас 'Money' розуміти оператор +, щоб Money(100) + Money(50) повертало Money(150), і виведіть результат.",
+  "expectedOutput": "150",
+  "hint": "У тілі Money: `Money operator+(const Money& o) { return Money(money + o.money); }`",
+  "order": 19
+}

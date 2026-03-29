@@ -1,0 +1,38 @@
+[
+  {
+    "id": "hello-world",
+    "name": "Hello World",
+    "description": "Базова програма — вивести привітання",
+    "code": "#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << \"Hello, World!\" << endl;\n    return 0;\n}"
+  },
+  {
+    "id": "cin-cout",
+    "name": "Ввід/Вивід (cin/cout)",
+    "description": "Зчитати два числа та вивести їх суму",
+    "code": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int a, b;\n    cout << \"Введіть два числа: \";\n    cin >> a >> b;\n    cout << \"Сума: \" << a + b << endl;\n    return 0;\n}"
+  },
+  {
+    "id": "array-loop",
+    "name": "Масив + Цикл",
+    "description": "Створити масив та перебрати його циклом",
+    "code": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int arr[] = {10, 20, 30, 40, 50};\n    int sum = 0;\n    \n    for (int i = 0; i < 5; i++) {\n        sum += arr[i];\n    }\n    \n    cout << \"Сума елементів: \" << sum << endl;\n    return 0;\n}"
+  },
+  {
+    "id": "class-basic",
+    "name": "Клас (ООП)",
+    "description": "Базовий клас з конструктором та методами",
+    "code": "#include <iostream>\n#include <string>\nusing namespace std;\n\nclass Player {\nprivate:\n    string name;\n    int hp;\npublic:\n    Player(string n, int h) : name(n), hp(h) {}\n    \n    void info() {\n        cout << name << \" | HP: \" << hp << endl;\n    }\n    \n    void takeDamage(int dmg) {\n        hp -= dmg;\n        if (hp < 0) hp = 0;\n    }\n};\n\nint main() {\n    Player hero(\"Warrior\", 100);\n    hero.info();\n    hero.takeDamage(30);\n    hero.info();\n    return 0;\n}"
+  },
+  {
+    "id": "file-io",
+    "name": "Робота з файлами",
+    "description": "Запис та читання з файлу",
+    "code": "#include <iostream>\n#include <fstream>\n#include <string>\nusing namespace std;\n\nint main() {\n    // Запис\n    ofstream out(\"data.txt\");\n    out << \"Hello from C++!\" << endl;\n    out.close();\n    \n    // Читання\n    ifstream in(\"data.txt\");\n    string line;\n    while (getline(in, line)) {\n        cout << line << endl;\n    }\n    in.close();\n    return 0;\n}"
+  },
+  {
+    "id": "vector-stl",
+    "name": "Вектор (STL)",
+    "description": "Динамічний масив з бібліотеки STL",
+    "code": "#include <iostream>\n#include <vector>\n#include <algorithm>\nusing namespace std;\n\nint main() {\n    vector<int> v = {5, 2, 8, 1, 9, 3};\n    \n    sort(v.begin(), v.end());\n    \n    cout << \"Відсортований вектор: \";\n    for (int x : v) {\n        cout << x << \" \";\n    }\n    cout << endl;\n    \n    return 0;\n}"
+  }
+]

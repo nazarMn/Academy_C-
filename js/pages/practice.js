@@ -1,7 +1,6 @@
 /* js/pages/practice.js — Секція практики з Monaco Editor */
 
 const PracticePage = (() => {
-  const BACKEND_URL = 'http://localhost:3001';
 
   const TASKS = [
     {
@@ -193,6 +192,10 @@ const PracticePage = (() => {
           <span class="monaco-status" id="taskStatus">● Готовий</span>
         </div>
         <div id="taskMonacoEditor" class="monaco-container" style="height:300px;"></div>
+        <div id="taskStdinSection" style="display:none;margin-top:0.5rem;">
+          <label style="font-size:0.82rem;color:var(--text-muted);display:block;margin-bottom:0.3rem">⌨️ Ввід програми (stdin):</label>
+          <textarea id="taskStdinInput" rows="2" style="width:100%;background:var(--bg-tertiary);color:var(--text-primary);border:1px solid var(--border-color);border-radius:8px;padding:0.6rem;font-family:var(--font-code);font-size:0.85rem;resize:vertical" placeholder="Введіть дані для cin..."></textarea>
+        </div>
         <div class="code-output" id="codeOutput" style="display:none;min-height:60px"></div>
       </div>
 
@@ -230,10 +233,12 @@ const PracticePage = (() => {
     setTaskStatus('Виконання...');
 
     try {
-      const response = await fetch(`${BACKEND_URL}/api/execute`, {
+      const stdinEl = document.getElementById('taskStdinInput');
+      const input = stdinEl ? stdinEl.value : '';
+      const response = await fetch(`${window.BACKEND_URL}/api/execute`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code, testCases: currentTask.testCases }),
+        body: JSON.stringify({ code, input, testCases: currentTask.testCases }),
       });
 
       if (!response.ok) throw new Error('Backend unavailable');

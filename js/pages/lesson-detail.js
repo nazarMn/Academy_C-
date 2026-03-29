@@ -1,7 +1,6 @@
 /* js/pages/lesson-detail.js — Детальна сторінка уроку з Monaco Editor */
 
 const LessonDetailPage = (() => {
-  const BACKEND_URL = 'http://localhost:3001';
   let currentEditorId = null;
 
   function render(lessonId) {
@@ -95,6 +94,10 @@ const LessonDetailPage = (() => {
                 <span class="monaco-status" id="editorStatus">● Готовий</span>
               </div>
               <div id="practiceEditor" class="monaco-container" style="height:280px;"></div>
+              <div id="stdinSection" style="display:none;margin-top:0.5rem;">
+                <label style="font-size:0.82rem;color:var(--text-muted);display:block;margin-bottom:0.3rem">⌨️ Ввід програми (stdin) — кожен рядок = окремий ввід:</label>
+                <textarea id="stdinInput" rows="3" style="width:100%;background:var(--bg-tertiary);color:var(--text-primary);border:1px solid var(--border-color);border-radius:8px;padding:0.6rem;font-family:var(--font-code);font-size:0.85rem;resize:vertical" placeholder="Введіть дані для cin, наприклад:\n5\n10"></textarea>
+              </div>
               <div class="code-output" id="practiceOutput" style="display:none"></div>
             </div>
             <div style="display:flex;gap:0.75rem;margin-top:1rem;flex-wrap:wrap">
@@ -149,7 +152,23 @@ const LessonDetailPage = (() => {
     const codeToLoad = savedCode || defaultCode;
     EditorManager.onReady(() => {
       EditorManager.create('practiceEditor', codeToLoad, { });
+
+      // Auto-show stdin field if code uses cin/getline
+      setTimeout(() => {
+        detectStdinNeed();
+      }, 500);
     });
+  }
+
+  /**
+   * Show/hide stdin input based on whether code uses cin/getline
+   */
+  function detectStdinNeed() {
+    const code = getEditorCode();
+    const section = document.getElementById('stdinSection');
+    if (!section) return;
+    const needsInput = /\b(cin\s*>>|getline\s*\()/i.test(code);
+    section.style.display = needsInput ? 'block' : 'none';
   }
 
   // Запускаємо код через backend
@@ -159,9 +178,12 @@ const LessonDetailPage = (() => {
     if (!outputEl) return;
     outputEl.style.display = 'block';
 
-    // ── DEBUG: Log raw code ──
-    console.log('[LessonDetail:runCode] Raw editor code:', code.substring(0, 120));
-    console.log('[LessonDetail:runCode] Has <iostream>?', code.includes('<iostream>'));
+    // Detect stdin need on run
+    detectStdinNeed();
+
+    // Get stdin input
+    const stdinEl = document.getElementById('stdinInput');
+    const input = stdinEl ? stdinEl.value : '';
 
     if (!code || code.trim().length < 15) {
       outputEl.className = 'code-output output-error';
@@ -174,10 +196,10 @@ const LessonDetailPage = (() => {
     setStatus('Виконання...');
 
     try {
-      const response = await fetch(`${BACKEND_URL}/api/execute`, {
+      const response = await fetch(`${window.BACKEND_URL}/api/execute`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code, onlyRun: true }),
+        body: JSON.stringify({ code, input, onlyRun: true }),
       });
 
       if (!response.ok) throw new Error('Сервер недоступний');
@@ -221,12 +243,15 @@ const LessonDetailPage = (() => {
 
     // Спочатку пробуємо backend
     try {
-      const response = await fetch(`${BACKEND_URL}/api/execute`, {
+      const stdinEl = document.getElementById('stdinInput');
+      const input = stdinEl ? stdinEl.value : '';
+      const response = await fetch(`${window.BACKEND_URL}/api/execute`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           code,
-          testCases: [{ input: '', expectedOutput: lesson.expectedOutput.replace(/\\\\n/g, '\n') }],
+          input,
+          testCases: [{ input: input, expectedOutput: lesson.expectedOutput.replace(/\\\\n/g, '\n') }],
         }),
       });
 

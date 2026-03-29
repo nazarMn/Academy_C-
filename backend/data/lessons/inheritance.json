@@ -1,0 +1,29 @@
+{
+  "id": "inheritance",
+  "title": "Успадкування",
+  "level": "oop",
+  "xp": 50,
+  "levelLabel": "ООП (Просунутий)",
+  "icon": "🧬",
+  "videos": [
+    {
+      "id": "5fIuUPUG4jI",
+      "title": "ООП (частина 4). Успадкування"
+    },
+    {
+      "id": "ijGbhqleWFU",
+      "title": "Успадкування та поліморфізм в C++"
+    }
+  ],
+  "explanation": "<h3>1. Що таке Успадкування? (Спадкоємці)</h3>\n<p>Уявіть, що ви створюєте гру. У вас є класи <code>Warrior</code>, <code>Mage</code> та <code>Archer</code>. Всі вони мають <code>hp</code>, <code>name</code>, методи <code>move()</code> та <code>die()</code>. Писати ці однакові змінні 3 рази — порушення правила DRY (Don't Repeat Yourself).<br>\nЩо якщо створити один <strong>БАЗОВИЙ КЛАС (Батько)</strong> <code>Character</code> з усією базовою логікою, а Маг і Воїн просто <strong>УСПАДКУЮТЬ</strong> його? Вони автоматично отримають всі ці методи та поля абсолютно безкоштовно!</p>\n\n<h3>2. Синтаксис успадкування</h3>\n<p>Це робиться за допомогою двокрапки після назви нового класу:</p>\n<code>\nclass Mage : public Character {<br>\n&nbsp;&nbsp;&nbsp;&nbsp;int mana; // Додали щось своє, чого немає у звичайного персонажа<br>\n};\n</code>\n<p>Відтепер об'єкт Мага має <code>hp</code> та <code>name</code> (бо він успадкував їх) І <code>mana</code> (своє власне).</p>\n\n<h3>3. Protected (Захищений доступ)</h3>\n<p>Якщо ви зробите `hp` приватною (<code>private</code>) в <code>Character</code>, то навіть його Діти (Mage) не зможуть до неї напряму звернутися! Приватне означає приватне ТІЛЬКИ для себе.<br>\nЩоб дозволити Дітям бачити змінну, але приховати її від <code>main()</code>, використовується специфікатор <strong><code>protected</code></strong>.</p>\n\n<h3>4. Виклик конструктора Батька (Super)</h3>\n<p>Коли народжується Маг (Дитина), система спершу <strong>ЗОБОВ'ЯЗАНА</strong> народити його Базис (Батька). Якщо в Батька є строгий конструктор з параметрами (наприклад, ім'я), Маг мусить передати ці параметри в конструктор Батька за допомогою списку ініціалізації!</p>\n<code>\nMage(string n, int m) : Character(n), mana(m) {} \n</code>\n<div class=\"note-box\">\n  💡 <strong>Порядок створення/знищення:</strong> При створенні об'єкта-сина спочатку відпрацьовує Конструктор Батька (фундамент), а потім Сина (дах). А знищуються вони навпаки — спочатку згорить дах (Деструктор Сина), потім фундамент (Деструктор Батька).\n</div>",
+  "code": "#include <iostream>\n#include <string>\nusing namespace std;\n\n// 1. БАЗОВИЙ КЛАС\nclass Animal {\nprotected: // Замінили private на protected, щоб Собака та Кіт мали доступ\n    string name;\n    int age;\n\npublic:\n    Animal(string n, int a) : name(n), age(a) { }\n\n    void sleep() {\n        cout << name << \" зараз міцно спить... Zzz\" << endl;\n    }\n};\n\n\n// 2. КЛАС СПАДКОЄМЕЦЬ (Dog успадковує ВСЕ у Animal)\nclass Dog : public Animal {\nprivate:\n    string breed; // Унікальне поле собаки (тварина абстрактна породи не має)\n    \npublic:\n    // Конструктор Собаки ПЕПЕРЕДАЄ ім'я та вік до конструктора Animal\n    Dog(string n, int a, string b) : Animal(n, a), breed(b) { }\n\n    void bark() {\n        // Доступ до name можливий, бо воно protected в батькові!\n        cout << \"[\" << breed << \"] \" << name << \" каже: Гав-Гав!\" << endl;\n    }\n};\n\n\n// 3. ЩЕ ОДИН СПАДКОЄМЕЦЬ (Кішка) \nclass Cat : public Animal {\npublic:\n    Cat(string n, int a) : Animal(n, a) {}\n\n    void meow() {\n        cout << name << \" каже: Мяу! І просить їсти.\" << endl;\n    }\n};\n\n\nint main() {\n    Dog rex(\"Рекс\", 4, \"Вівчарка\");\n    Cat murka(\"Мурка\", 2);\n\n    // Ми можемо викликати sleep(), бо Dog і Cat його успішно УСПАДКУВАЛИ\n    cout << \"\n==== Вечір ====\" << endl;\n    rex.sleep(); \n    murka.sleep();\n\n    // АЛЕ унікальні методи існують тільки для конкретних класів\n    cout << \"\n==== Ранок ====\" << endl;\n    rex.bark(); \n    murka.meow();\n\n    return 0;\n}",
+  "codeExplanation": [
+    "`class Dog : public Animal` вказує компілятору скопіювати всю публічну і захищену логіку `Animal` в клас `Dog`.",
+    "`Animal(n, a)` всередині списку ініціалізації `Dog` гарантує, що базова частина буде сконструйована правильно.",
+    "Якщо ми спробуємо в main() написати `murka.name = \"Tom\"`, буде помилка! `protected` захищає змінну від зовнішнього втручання, як і `private`."
+  ],
+  "practiceTask": "Напишіть базовий клас 'Vehicle' з полем 'speed' і методом move(). Від нього успадкуйте 'Bicycle' з методом ringBell().",
+  "expectedOutput": "Vehicle is moving at 20 kmh\nRing-ring!",
+  "hint": "class Bicycle : public Vehicle { public: Bicycle(int s) : Vehicle(s) {} void ringBell() { cout << \"Ring\"; } };",
+  "order": 17
+}
