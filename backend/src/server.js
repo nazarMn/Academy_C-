@@ -80,7 +80,7 @@ app.use((req, res, next) => {
 // ─── STATIC FILES (serves the frontend) ──────────────────────
 
 // Serve frontend files from project root
-const frontendDir = path.join(__dirname, '../../');
+const frontendDir = path.join(__dirname, '../../frontend/dist');
 app.use(express.static(frontendDir, {
   index: 'index.html',
   extensions: ['html'],

@@ -1,9 +1,19 @@
-# ─── Build Stage ─────────────────────────────────────
-FROM node:20-alpine AS builder
+# ─── Build Stage for Backend ─────────────────────────
+FROM node:20-alpine AS backend-builder
 
 WORKDIR /app/backend
 COPY backend/package*.json ./
 RUN npm ci --production
+
+# ─── Build Stage for Frontend ────────────────────────
+FROM node:20-alpine AS frontend-builder
+
+WORKDIR /app/frontend
+COPY frontend/package*.json ./
+RUN npm ci
+
+COPY frontend/ ./
+RUN npm run build
 
 # ─── Runtime Stage ───────────────────────────────────
 FROM node:20-alpine
@@ -16,16 +26,14 @@ RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
 WORKDIR /app
 
-# Copy frontend files
-COPY index.html ./
-COPY css/ ./css/
-COPY js/ ./js/
+# Copy the built frontend into frontend/dist
+COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 
 # Copy backend
 COPY backend/src/ ./backend/src/
 COPY backend/data/ ./backend/data/
 COPY backend/scripts/ ./backend/scripts/
-COPY --from=builder /app/backend/node_modules ./backend/node_modules
+COPY --from=backend-builder /app/backend/node_modules ./backend/node_modules
 COPY backend/package.json ./backend/
 
 # Create temp directory for code execution
