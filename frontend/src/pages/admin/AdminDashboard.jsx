@@ -7,7 +7,7 @@ export default function AdminDashboard() {
   const { token } = useAppStore();
 
   useEffect(() => {
-    fetch('http://localhost:3001/api/admin/analytics', {
+    fetch('/api/admin/analytics', {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())

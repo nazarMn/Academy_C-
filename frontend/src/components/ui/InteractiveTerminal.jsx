@@ -57,7 +57,7 @@ const InteractiveTerminal = forwardRef(({
     xtermRef.current = { terminal, fitAddon };
 
     // Persistent socket setup
-    const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+    const backendUrl = import.meta.env.DEV ? 'http://localhost:3001' : '';
     const socket = io(backendUrl);
     socketRef.current = socket;
 

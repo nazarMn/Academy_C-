@@ -125,7 +125,7 @@ const useAppStore = create(
         const state = get();
         if (state.token && !state.isGuest) {
           try {
-            await fetch('http://localhost:3001/api/user/save-code', {
+            await fetch('/api/user/save-code', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -149,7 +149,7 @@ const useAppStore = create(
         const state = get();
         if (state.token && !state.isGuest) {
           try {
-            await fetch('http://localhost:3001/api/user/save-code', {
+            await fetch('/api/user/save-code', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -367,7 +367,7 @@ const useAppStore = create(
         const state = get();
         if (!state.token || state.isGuest) return;
         try {
-          await fetch('http://localhost:3001/api/user/sync', {
+          await fetch('/api/user/sync', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -399,7 +399,7 @@ const useAppStore = create(
         const state = get();
         if (!state.token || state.isGuest) return;
         try {
-          const res = await fetch('http://localhost:3001/api/auth/me', {
+          const res = await fetch('/api/auth/me', {
             headers: { 'Authorization': `Bearer ${state.token}` },
           });
           if (res.ok) {

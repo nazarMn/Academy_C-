@@ -7,7 +7,7 @@ import {
 import { Card, Badge, Button } from '@/components/ui';
 import * as Icons from 'lucide-react';
 
-const API = 'http://localhost:3001/api';
+const API = '/api';
 
 export default function ExamArchives() {
   const [archives, setArchives] = useState([]);

@@ -29,7 +29,7 @@ export default function Practice() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch(`http://localhost:3001/api/practice?courseId=${activeCourse}`);
+        const res = await fetch(`/api/practice?courseId=${activeCourse}`);
         if (res.ok) setTasks(await res.json());
       } catch (err) {
         console.error('Failed to load practice tasks', err);

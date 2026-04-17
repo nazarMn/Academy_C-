@@ -29,7 +29,7 @@ export default function AdminPractice() {
 
   const fetchTasks = () => {
     if (!activeAdminCourse) return;
-    fetch(`http://localhost:3001/api/admin/practice?courseId=${activeAdminCourse}`, {
+    fetch(`/api/admin/practice?courseId=${activeAdminCourse}`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
@@ -50,7 +50,7 @@ export default function AdminPractice() {
   const handleDelete = async (id) => {
     if (!confirm('Видалити завдання? Це неможливо скасувати.')) return;
     try {
-      const res = await fetch(`http://localhost:3001/api/admin/practice/${id}`, {
+      const res = await fetch(`/api/admin/practice/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -67,7 +67,7 @@ export default function AdminPractice() {
     e.preventDefault();
     try {
       if (!isEditing) formData.courseId = activeAdminCourse;
-      const url = `http://localhost:3001/api/admin/practice${isEditing ? `/${formData.id}` : ''}`;
+      const url = `/api/admin/practice${isEditing ? `/${formData.id}` : ''}`;
       const res = await fetch(url, {
         method: isEditing ? 'PUT' : 'POST',
         headers: {
@@ -108,12 +108,12 @@ export default function AdminPractice() {
 
     try {
       await Promise.all([
-        fetch(`http://localhost:3001/api/admin/practice/${newOrder[idx].id}`, {
+        fetch(`/api/admin/practice/${newOrder[idx].id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({ order: newOrder[idx].order })
         }),
-        fetch(`http://localhost:3001/api/admin/practice/${newOrder[swapIdx].id}`, {
+        fetch(`/api/admin/practice/${newOrder[swapIdx].id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({ order: newOrder[swapIdx].order })

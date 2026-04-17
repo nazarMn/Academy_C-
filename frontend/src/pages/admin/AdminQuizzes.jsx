@@ -31,7 +31,7 @@ export default function AdminQuizzes() {
 
   const fetchQuizzes = () => {
     if (!activeAdminCourse) return;
-    fetch(`http://localhost:3001/api/admin/quizzes?courseId=${activeAdminCourse}`, {
+    fetch(`/api/admin/quizzes?courseId=${activeAdminCourse}`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
@@ -52,7 +52,7 @@ export default function AdminQuizzes() {
   const handleDelete = async (id) => {
     if (!confirm('Видалити тест? Це неможливо скасувати.')) return;
     try {
-      const res = await fetch(`http://localhost:3001/api/admin/quizzes/${id}`, {
+      const res = await fetch(`/api/admin/quizzes/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -73,7 +73,7 @@ export default function AdminQuizzes() {
     }
     try {
       if (!isEditing) formData.courseId = activeAdminCourse;
-      const url = `http://localhost:3001/api/admin/quizzes${isEditing ? `/${formData.id}` : ''}`;
+      const url = `/api/admin/quizzes${isEditing ? `/${formData.id}` : ''}`;
       const res = await fetch(url, {
         method: isEditing ? 'PUT' : 'POST',
         headers: {
@@ -142,12 +142,12 @@ export default function AdminQuizzes() {
 
     try {
       await Promise.all([
-        fetch(`http://localhost:3001/api/admin/quizzes/${newOrder[idx].id}`, {
+        fetch(`/api/admin/quizzes/${newOrder[idx].id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({ order: newOrder[idx].order })
         }),
-        fetch(`http://localhost:3001/api/admin/quizzes/${newOrder[swapIdx].id}`, {
+        fetch(`/api/admin/quizzes/${newOrder[swapIdx].id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({ order: newOrder[swapIdx].order })

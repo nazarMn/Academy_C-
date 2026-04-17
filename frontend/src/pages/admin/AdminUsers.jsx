@@ -10,7 +10,7 @@ export default function AdminUsers() {
   const { addToast } = useToast();
 
   const fetchUsers = () => {
-    fetch('http://localhost:3001/api/admin/users', {
+    fetch('/api/admin/users', {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
@@ -25,7 +25,7 @@ export default function AdminUsers() {
   const toggleRole = async (userId, currentRole) => {
     const newRole = currentRole === 'admin' ? 'user' : 'admin';
     try {
-      const res = await fetch(`http://localhost:3001/api/admin/users/${userId}`, {
+      const res = await fetch(`/api/admin/users/${userId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -47,7 +47,7 @@ export default function AdminUsers() {
 
   const toggleBan = async (userId, currentBanStatus) => {
     try {
-      const res = await fetch(`http://localhost:3001/api/admin/users/${userId}`, {
+      const res = await fetch(`/api/admin/users/${userId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

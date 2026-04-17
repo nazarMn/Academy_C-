@@ -10,7 +10,7 @@ import { InteractiveTerminal } from '@/components/ui';
 import MonacoEditor from '@/components/editor/MonacoEditor';
 import useAppStore from '@/stores/useAppStore';
 
-const API = 'http://localhost:3001/api';
+const API = '/api';
 const LANG_LABELS = { c: 'C', cpp: 'C++', python: 'Python', javascript: 'JavaScript', java: 'Java', csharp: 'C#' };
 const LANG_MONACO = { c: 'c', cpp: 'cpp', python: 'python', javascript: 'javascript', java: 'java', csharp: 'csharp' };
 

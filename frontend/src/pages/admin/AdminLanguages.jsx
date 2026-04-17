@@ -31,7 +31,7 @@ export default function AdminLanguages() {
   const { addToast } = useToast();
 
   const fetchCourses = () => {
-    fetch('http://localhost:3001/api/admin/courses', {
+    fetch('/api/admin/courses', {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
@@ -52,7 +52,7 @@ export default function AdminLanguages() {
   const handleDelete = async (id) => {
     if (!confirm('Видалити курс? Це неможливо скасувати.')) return;
     try {
-      const res = await fetch(`http://localhost:3001/api/admin/courses/${id}`, {
+      const res = await fetch(`/api/admin/courses/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -68,7 +68,7 @@ export default function AdminLanguages() {
   const handleSave = async (e) => {
     e.preventDefault();
     try {
-      const url = `http://localhost:3001/api/admin/courses${isEditing ? `/${formData.id}` : ''}`;
+      const url = `/api/admin/courses${isEditing ? `/${formData.id}` : ''}`;
       const res = await fetch(url, {
         method: isEditing ? 'PUT' : 'POST',
         headers: {
@@ -101,7 +101,7 @@ export default function AdminLanguages() {
     setCourses(prev => prev.map(c => c.id === course.id ? { ...c, ...updates } : c));
 
     try {
-      await fetch(`http://localhost:3001/api/admin/courses/${course.id}`, {
+      await fetch(`/api/admin/courses/${course.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(updates)
@@ -131,12 +131,12 @@ export default function AdminLanguages() {
 
     try {
       await Promise.all([
-        fetch(`http://localhost:3001/api/admin/courses/${newOrder[idx].id}`, {
+        fetch(`/api/admin/courses/${newOrder[idx].id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({ order: newOrder[idx].order })
         }),
-        fetch(`http://localhost:3001/api/admin/courses/${newOrder[swapIdx].id}`, {
+        fetch(`/api/admin/courses/${newOrder[swapIdx].id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({ order: newOrder[swapIdx].order })

@@ -28,10 +28,10 @@ export default function Dashboard() {
     async function loadStats() {
       try {
         const [l, q, prj, prac] = await Promise.all([
-          fetch(`http://localhost:3001/api/lessons?courseId=${activeCourse}`).then(r => r.json()),
-          fetch(`http://localhost:3001/api/quizzes?courseId=${activeCourse}`).then(r => r.json()),
-          fetch(`http://localhost:3001/api/projects?courseId=${activeCourse}`).then(r => r.json()),
-          fetch(`http://localhost:3001/api/practice?courseId=${activeCourse}`).then(r => r.json())
+          fetch(`/api/lessons?courseId=${activeCourse}`).then(r => r.json()),
+          fetch(`/api/quizzes?courseId=${activeCourse}`).then(r => r.json()),
+          fetch(`/api/projects?courseId=${activeCourse}`).then(r => r.json()),
+          fetch(`/api/practice?courseId=${activeCourse}`).then(r => r.json())
         ]);
         setCourseData({ lessons: l, quizzes: q, projects: prj, practice: prac });
       } catch(e) {

@@ -29,7 +29,7 @@ export default function InteractiveLesson() {
     async function fetchLesson() {
       setLoading(true);
       try {
-        const res = await fetch(`http://localhost:3001/api/interactive/${lessonId}`);
+        const res = await fetch(`/api/interactive/${lessonId}`);
         if (res.ok) {
           const data = await res.json();
           setLesson(data);
@@ -125,7 +125,7 @@ export default function InteractiveLesson() {
   const [nextLesson, setNextLesson] = useState(null);
   useEffect(() => {
     if (solved && lesson) {
-      fetch(`http://localhost:3001/api/interactive?courseId=${activeCourse}`)
+      fetch(`/api/interactive?courseId=${activeCourse}`)
         .then(r => r.json())
         .then(list => {
           const idx = list.findIndex(l => l.id === lessonId);

@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import useAppStore from '@/stores/useAppStore';
 
-const API = 'http://localhost:3001/api';
+const API = '/api';
 const AVAILABLE_LANGUAGES = [
   { id: 'c', label: 'C' },
   { id: 'cpp', label: 'C++' },

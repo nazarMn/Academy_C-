@@ -35,7 +35,7 @@ export default function Profile() {
   const [totalLessons, setTotalLessons] = useState(25); // Fallback estimate
 
   useEffect(() => {
-    fetch('http://localhost:3001/api/lessons')
+    fetch('/api/lessons')
       .then(res => res.json())
       .then(data => setTotalLessons(data.length))
       .catch(() => {});

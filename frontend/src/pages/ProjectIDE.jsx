@@ -45,7 +45,7 @@ export default function ProjectIDE() {
     async function load() {
       setLoading(true);
       try {
-        const res = await fetch(`http://localhost:3001/api/projects/${projectId}`);
+        const res = await fetch(`/api/projects/${projectId}`);
         if (res.ok) {
           const data = await res.json();
           setProject(data);

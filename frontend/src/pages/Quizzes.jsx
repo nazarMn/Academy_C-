@@ -23,7 +23,7 @@ export default function Quizzes() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch(`http://localhost:3001/api/quizzes?courseId=${activeCourse}`);
+        const res = await fetch(`/api/quizzes?courseId=${activeCourse}`);
         if (res.ok) {
           const data = await res.json();
           setQuizzesList(data.map(q => ({ ...q, questionCount: q.questions?.length || 0 })));

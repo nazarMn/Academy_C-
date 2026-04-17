@@ -8,7 +8,7 @@ export default function StudentCourseSelector({ collapsed }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:3001/api/courses')
+    fetch('/api/courses')
       .then(res => res.json())
       .then(data => {
         setCourses(data);

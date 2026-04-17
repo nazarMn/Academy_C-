@@ -44,7 +44,7 @@ export default function AdminLessons() {
 
   const fetchLessons = () => {
     if (!activeAdminCourse) return;
-    fetch(`http://localhost:3001/api/admin/lessons?courseId=${activeAdminCourse}`, {
+    fetch(`/api/admin/lessons?courseId=${activeAdminCourse}`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
@@ -65,7 +65,7 @@ export default function AdminLessons() {
   const handleDelete = async (id) => {
     if (!confirm('Видалити урок? Це неможливо скасувати.')) return;
     try {
-      const res = await fetch(`http://localhost:3001/api/admin/lessons/${id}`, {
+      const res = await fetch(`/api/admin/lessons/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -82,7 +82,7 @@ export default function AdminLessons() {
     e.preventDefault();
     try {
       if (!isEditing) formData.courseId = activeAdminCourse; // force course assignment
-      const url = `http://localhost:3001/api/admin/lessons${isEditing ? `/${formData.id}` : ''}`;
+      const url = `/api/admin/lessons${isEditing ? `/${formData.id}` : ''}`;
       const res = await fetch(url, {
         method: isEditing ? 'PUT' : 'POST',
         headers: {
@@ -254,12 +254,12 @@ export default function AdminLessons() {
 
     try {
       await Promise.all([
-        fetch(`http://localhost:3001/api/admin/lessons/${newOrder[idx].id}`, {
+        fetch(`/api/admin/lessons/${newOrder[idx].id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({ order: newOrder[idx].order })
         }),
-        fetch(`http://localhost:3001/api/admin/lessons/${newOrder[swapIdx].id}`, {
+        fetch(`/api/admin/lessons/${newOrder[swapIdx].id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({ order: newOrder[swapIdx].order })
@@ -286,7 +286,7 @@ export default function AdminLessons() {
     try {
       await Promise.all(
         orderMap.map(({ id, order }) =>
-          fetch(`http://localhost:3001/api/admin/lessons/${id}`, {
+          fetch(`/api/admin/lessons/${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
             body: JSON.stringify({ order })

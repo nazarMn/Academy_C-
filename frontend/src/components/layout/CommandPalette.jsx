@@ -25,7 +25,7 @@ export default function CommandPalette() {
   const { theme, setTheme } = useAppStore();
 
   useEffect(() => {
-    fetch('http://localhost:3001/api/lessons')
+    fetch('/api/lessons')
       .then(res => res.json())
       .then(data => setLessons(data))
       .catch(() => {});

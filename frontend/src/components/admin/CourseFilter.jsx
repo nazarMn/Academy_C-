@@ -12,7 +12,7 @@ export default function CourseFilter() {
 
   const fetchCourses = async () => {
     try {
-      const res = await fetch('http://localhost:3001/api/admin/courses', {
+      const res = await fetch('/api/admin/courses', {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {

@@ -31,8 +31,8 @@ export default function Learn() {
       }
       try {
         const [resL, resI] = await Promise.all([
-          fetch(`http://localhost:3001/api/lessons?courseId=${activeCourse}`),
-          fetch(`http://localhost:3001/api/interactive?courseId=${activeCourse}`)
+          fetch(`/api/lessons?courseId=${activeCourse}`),
+          fetch(`/api/interactive?courseId=${activeCourse}`)
         ]);
         if (resL.ok) setLessons(await resL.json());
         if (resI.ok) setInteractiveLessons(await resI.json());

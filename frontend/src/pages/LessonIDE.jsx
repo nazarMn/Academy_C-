@@ -67,7 +67,7 @@ export default function LessonIDE() {
 
       // Load current lesson
       try {
-        const res = await fetch(`http://localhost:3001/api/lessons/${lessonId}`);
+        const res = await fetch(`/api/lessons/${lessonId}`);
         if (res.ok) {
           const data = await res.json();
           const injected = injectLesson(data, userData);
@@ -83,7 +83,7 @@ export default function LessonIDE() {
 
       // Load list for next/prev
       try {
-        const listRes = await fetch(`http://localhost:3001/api/lessons?courseId=${activeCourse}`);
+        const listRes = await fetch(`/api/lessons?courseId=${activeCourse}`);
         if (listRes.ok) {
           const list = await listRes.json();
           const currentIdx = list.findIndex(l => l.id === lessonId);

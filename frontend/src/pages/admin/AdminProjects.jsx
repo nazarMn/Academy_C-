@@ -27,7 +27,7 @@ export default function AdminProjects() {
 
   const fetchProjects = () => {
     if (!activeAdminCourse) return;
-    fetch(`http://localhost:3001/api/admin/projects?courseId=${activeAdminCourse}`, {
+    fetch(`/api/admin/projects?courseId=${activeAdminCourse}`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
@@ -48,7 +48,7 @@ export default function AdminProjects() {
   const handleDelete = async (id) => {
     if (!confirm('Видалити проєкт? Це неможливо скасувати.')) return;
     try {
-      const res = await fetch(`http://localhost:3001/api/admin/projects/${id}`, {
+      const res = await fetch(`/api/admin/projects/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -65,7 +65,7 @@ export default function AdminProjects() {
     e.preventDefault();
     try {
       if (!isEditing) formData.courseId = activeAdminCourse; // force course assignment
-      const url = `http://localhost:3001/api/admin/projects${isEditing ? `/${formData.id}` : ''}`;
+      const url = `/api/admin/projects${isEditing ? `/${formData.id}` : ''}`;
       const res = await fetch(url, {
         method: isEditing ? 'PUT' : 'POST',
         headers: {

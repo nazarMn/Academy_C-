@@ -19,7 +19,7 @@ export default function Projects() {
   useEffect(() => {
     async function loadProjects() {
       try {
-        const res = await fetch(`http://localhost:3001/api/projects?courseId=${activeCourse}`);
+        const res = await fetch(`/api/projects?courseId=${activeCourse}`);
         if (res.ok) {
           const data = await res.json();
           setProjects(data);
