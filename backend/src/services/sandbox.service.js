@@ -1,6 +1,7 @@
 /**
  * sandbox.service.js — Secure code execution abstraction
- * Handles compilation and execution of C++ binaries with security constraints
+ * Handles execution of processes with security constraints and timeouts.
+ * Completely language-agnostic.
  */
 
 const { spawn } = require('child_process');
@@ -25,21 +26,19 @@ function uniqueId() {
 
 /**
  * Create a temporary directory for code execution
- * @returns {{ dir: string, srcFile: string, binFile: string }}
+ * @param {string} prefix - Prefix for the temporary directory
+ * @returns {string} Path to the created directory
  */
-function createTempFiles() {
+function createTempDirectory(prefix = 'exec_') {
   const id = uniqueId();
-  const dir = path.join(os.tmpdir(), `cpp_exec_${id}`);
+  const dir = path.join(os.tmpdir(), `${prefix}${id}`);
   fs.mkdirSync(dir, { recursive: true });
-
-  const srcFile = path.join(dir, 'main.cpp');
-  const binFile = path.join(dir, isWindows ? 'main.exe' : 'main');
-
-  return { dir, srcFile, binFile };
+  return dir;
 }
 
 /**
  * Clean up temporary directory and all contents
+ * @param {string} dir - Path to the directory to clean up
  */
 function cleanup(dir) {
   try {
@@ -57,78 +56,37 @@ function cleanup(dir) {
 }
 
 /**
- * Compile a C++ source file using g++
- * @param {string} srcFile - Path to the .cpp source
- * @param {string} binFile - Path for the output binary
- * @returns {Promise<{ success: boolean, stderr: string }>}
- */
-function compile(srcFile, binFile) {
-  return new Promise((resolve) => {
- const args = [srcFile, '-o', binFile, '-std=c++17', '-O2', '-Wall', '-Wextra'];
-
-    // On Linux, add security flags
-    if (!isWindows) {
-      args.push('-static');  // Static linking for portability
-    }
-
-    logger.debug('Sandbox', `Compiling: g++ ${args.join(' ').substring(0, 80)}...`);
-
-    const proc = spawn('g++', args, {
-      timeout: COMPILE_TIMEOUT_MS,
-      stdio: ['ignore', 'pipe', 'pipe'],
-    });
-
-    let stderr = '';
-    proc.stderr.on('data', (d) => { stderr += d.toString(); });
-
-    const timer = setTimeout(() => {
-      try { proc.kill('SIGKILL'); } catch (e) { /* ignore */ }
-      resolve({ success: false, stderr: 'Перевищено час компіляції (15с). Код занадто складний.' });
-    }, COMPILE_TIMEOUT_MS);
-
-    proc.on('close', (code) => {
-      clearTimeout(timer);
-      resolve({ success: code === 0, stderr });
-    });
-
-    proc.on('error', (err) => {
-      clearTimeout(timer);
-      resolve({
-        success: false,
-        stderr: `g++ не знайдено. Переконайтесь, що GCC встановлений і додано до PATH.\n${err.message}`,
-      });
-    });
-  });
-}
-
-/**
- * Execute a compiled binary with optional stdin input
- * @param {string} binFile - Path to the compiled binary
- * @param {string} stdin   - Input to pass via stdin
+ * Execute a command with security constraints (timeout, max output)
+ * @param {string} command - Command to execute
+ * @param {Array<string>} args - Arguments for the command
+ * @param {Object} options - execution options (timeoutMs, stdin)
  * @returns {Promise<{ stdout: string, stderr: string, timedOut: boolean, exitCode: number|null, timeMs: number }>}
  */
-function execute(binFile, stdin = '') {
+function exec(command, args = [], options = {}) {
   return new Promise((resolve) => {
     const start = Date.now();
+    const timeoutMs = options.timeoutMs || EXECUTION_TIMEOUT_MS;
+    const stdin = options.stdin || '';
     
-    const spawnOptions = {
+    let spawnOptions = {
       stdio: ['pipe', 'pipe', 'pipe'],
-      timeout: EXECUTION_TIMEOUT_MS,
+      timeout: timeoutMs,
+      env: { ...process.env, ...(options.env || {}) },
     };
 
     // On Linux (Render), apply resource limits
     if (!isWindows) {
       spawnOptions.env = {
-        ...process.env,
+        ...spawnOptions.env,
         // Restrict environment
         HOME: '/tmp',
         PATH: '/usr/bin:/bin',
       };
     }
 
-    logger.debug('Sandbox', `Executing: ${binFile} with stdin (${stdin.length} chars)`);
+    logger.debug('Sandbox', `Executing: ${command} ${args.join(' ')}`);
 
-    const proc = spawn(binFile, [], spawnOptions);
+    const proc = spawn(command, args, spawnOptions);
     let stdout = '';
     let stderr = '';
     let timedOut = false;
@@ -164,7 +122,7 @@ function execute(binFile, stdin = '') {
           try { proc.kill('SIGKILL'); } catch (e) { /* ignore */ }
         }, 1000);
       } catch (e) { /* ignore */ }
-    }, EXECUTION_TIMEOUT_MS);
+    }, timeoutMs);
 
     proc.on('close', (code) => {
       clearTimeout(timer);
@@ -190,11 +148,103 @@ function execute(binFile, stdin = '') {
   });
 }
 
+/**
+ * Execute a command interactively and pipe I/O to a socket
+ */
+function execInteractive(command, args = [], socket, options = {}) {
+  return new Promise((resolve) => {
+    const timeoutMs = options.timeoutMs || EXECUTION_TIMEOUT_MS * 4; // Allow more time for interactive
+
+    let spawnOptions = {
+      stdio: ['pipe', 'pipe', 'pipe'],
+      env: { ...process.env, ...(options.env || {}) },
+    };
+
+    if (!isWindows) {
+      spawnOptions.env = {
+        ...spawnOptions.env,
+        HOME: '/tmp',
+        PATH: '/usr/bin:/bin',
+      };
+    }
+
+    const proc = spawn(command, args, spawnOptions);
+
+    let stdoutBytes = 0;
+    let killed = false;
+
+    // Handle stdout
+    proc.stdout.on('data', (d) => {
+      const chunk = d.toString();
+      stdoutBytes += chunk.length;
+      if (stdoutBytes > MAX_OUTPUT_LEN && !killed) {
+        killed = true;
+        socket.emit('output', `\r\n[Система]: Вивід перевищив максимальний розмір.\r\n`);
+        try { proc.kill('SIGKILL'); } catch (e) { /* ignore */ }
+      } else if (!killed) {
+        socket.emit('output', chunk);
+      }
+    });
+
+    // Handle stderr
+    proc.stderr.on('data', (d) => {
+      if (!killed) {
+        let chunk = d.toString();
+        // optionally style stderr
+        socket.emit('output', chunk);
+      }
+    });
+
+    // Listen to socket input to write to stdin
+    const inputHandler = (data) => {
+      if (!killed && proc.stdin.writable) {
+        proc.stdin.write(data);
+      }
+    };
+    socket.on('input', inputHandler);
+
+    // Provide a way to kill from client
+    const killHandler = () => {
+      killed = true;
+      try { proc.kill('SIGKILL'); } catch (e) { /* ignore */ }
+    };
+    socket.on('kill', killHandler);
+
+    const timer = setTimeout(() => {
+      killed = true;
+      socket.emit('output', `\r\n[Система]: Перевищено час виконання (${timeoutMs / 1000} сек).\r\n`);
+      try { proc.kill('SIGTERM'); } catch (e) {}
+      setTimeout(() => { try { proc.kill('SIGKILL'); } catch (e) {} }, 1000);
+    }, timeoutMs);
+
+    proc.on('close', (code) => {
+      clearTimeout(timer);
+      socket.off('input', inputHandler);
+      socket.off('kill', killHandler);
+      socket.emit('output', `\r\n[Програма завершилась з кодом ${code}]\r\n`);
+      socket.emit('execution_complete', { exitCode: code });
+      resolve();
+    });
+
+    proc.on('error', (err) => {
+      clearTimeout(timer);
+      socket.off('input', inputHandler);
+      socket.off('kill', killHandler);
+      socket.emit('output', `\r\n[Системна Помилка]: ${err.message}\r\n`);
+      socket.emit('execution_complete', { exitCode: 1 });
+      resolve();
+    });
+  });
+}
+
 module.exports = {
-  createTempFiles,
+  createTempDirectory,
   cleanup,
-  compile,
-  execute,
+  exec,
+  execInteractive,
+  COMPILE_TIMEOUT_MS,
   EXECUTION_TIMEOUT_MS,
   MAX_OUTPUT_LEN,
+  isWindows,
 };
+

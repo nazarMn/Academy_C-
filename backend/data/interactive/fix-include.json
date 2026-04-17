@@ -1,0 +1,26 @@
+{
+  "id": "fix-include",
+  "type": "interactive",
+  "title": "Виправ підключення бібліотеки",
+  "level": "beginner",
+  "xp": 15,
+  "scenario": "Програма не компілюється, бо бібліотека iostream підключена неправильно. Пропущено спеціальні символи.",
+  "brokenCode": "#include iostream\nusing namespace std;\n\nint main() {\n    cout << \"Hello!\" << endl;\n    return 0;\n}",
+  "task": "Виправте директиву #include — додайте потрібні символи.",
+  "hints": [
+    "Бібліотеки підключаються з кутовими дужками",
+    "Правильний запис: #include <iostream>"
+  ],
+  "solution": "#include <iostream>",
+  "errorPatterns": [
+    {
+      "match": "#include iostream",
+      "hint": "Потрібні кутові дужки: #include <iostream>"
+    },
+    {
+      "match": "include iostream",
+      "hint": "Потрібні кутові дужки: #include <iostream>"
+    }
+  ],
+  "order": 2
+}

@@ -1,0 +1,22 @@
+{
+  "id": "fix-pointer",
+  "type": "interactive",
+  "title": "Виправ покажчик",
+  "level": "intermediate",
+  "xp": 30,
+  "scenario": "Програма використовує покажчик, але є помилка з розіменуванням. Програма не виводить правильне значення.",
+  "brokenCode": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int x = 42;\n    int* ptr = x;\n    cout << \"Значення: \" << ptr << endl;\n    return 0;\n}",
+  "task": "Виправте ініціалізацію покажчика та його вивід.",
+  "hints": [
+    "Покажчику потрібна адреса змінної, а не її значення",
+    "Використайте &x для отримання адреси та *ptr для значення"
+  ],
+  "solution": "int* ptr = &x",
+  "errorPatterns": [
+    {
+      "match": "int* ptr = x;",
+      "hint": "Покажчику потрібна адреса: int* ptr = &x;"
+    }
+  ],
+  "order": 7
+}

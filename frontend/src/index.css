@@ -1,0 +1,126 @@
+/* ============================================
+   C++ Academy — Design System Stylesheet
+   ============================================ */
+
+/* ─── Google Fonts ─── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Base Layer ─── */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    @apply box-border;
+  }
+
+  html {
+    @apply scroll-smooth antialiased;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    overflow-x: hidden;
+  }
+
+  body {
+    @apply bg-surface-950 text-surface-50 font-sans leading-relaxed;
+    min-height: 100vh;
+    min-height: 100dvh; /* dynamic viewport height for mobile browsers */
+    overflow-x: hidden;
+    max-width: 100vw;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  #root {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  /* Light theme overrides */
+  body.light {
+    @apply bg-surface-100 text-surface-900;
+  }
+
+  /* Selection */
+  ::selection {
+    @apply bg-accent/30 text-surface-50;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    @apply w-1.5;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-surface-900;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-surface-600 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-accent;
+  }
+
+  /* Focus visible */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
+}
+
+/* ─── Component Layer ─── */
+@layer components {
+
+  /* ── Stagger Animation ── */
+  .stagger > * {
+    @apply opacity-0 animate-fade-in-up;
+  }
+  .stagger > *:nth-child(1)  { animation-delay: 0.05s; }
+  .stagger > *:nth-child(2)  { animation-delay: 0.10s; }
+  .stagger > *:nth-child(3)  { animation-delay: 0.15s; }
+  .stagger > *:nth-child(4)  { animation-delay: 0.20s; }
+  .stagger > *:nth-child(5)  { animation-delay: 0.25s; }
+  .stagger > *:nth-child(6)  { animation-delay: 0.30s; }
+  .stagger > *:nth-child(7)  { animation-delay: 0.35s; }
+  .stagger > *:nth-child(8)  { animation-delay: 0.40s; }
+  .stagger > *:nth-child(n+9){ animation-delay: 0.45s; }
+
+  /* ── Glass effect ── */
+  .glass {
+    @apply bg-white/[0.03] backdrop-blur-xl border border-surface-700/50;
+  }
+
+  /* ── Code syntax highlight tokens ── */
+  .token-keyword  { color: #c792ea; }
+  .token-string   { color: #c3e88d; }
+  .token-comment  { color: #546e7a; font-style: italic; }
+  .token-number   { color: #f78c6c; }
+  .token-function { color: #82aaff; }
+  .token-type     { color: #ffcb6b; }
+  .token-operator { color: #89ddff; }
+  .token-include  { color: #f07178; }
+}
+
+/* ─── Utility Layer ─── */
+@layer utilities {
+
+  /* Text gradient */
+  .text-gradient {
+    @apply bg-gradient-to-r from-accent to-accent-hover bg-clip-text text-transparent;
+  }
+
+  /* Glow border on hover */
+  .hover-glow {
+    @apply transition-shadow duration-300;
+  }
+  .hover-glow:hover {
+    @apply shadow-glow;
+  }
+
+  /* Hover lift */
+  .hover-lift {
+    @apply transition-transform duration-200;
+  }
+  .hover-lift:hover {
+    @apply -translate-y-0.5;
+  }
+}

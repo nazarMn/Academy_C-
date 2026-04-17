@@ -1,0 +1,17 @@
+{
+  "id": "fix-loop",
+  "type": "interactive",
+  "title": "Виправ нескінченний цикл",
+  "level": "intermediate",
+  "xp": 25,
+  "scenario": "Програма повинна вивести числа від 1 до 5, але зависає у нескінченному циклі. Щось не так з умовою або інкрементом.",
+  "brokenCode": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int i = 1;\n    while (i <= 5) {\n        cout << i << \" \";\n    }\n    cout << endl;\n    return 0;\n}",
+  "task": "Знайдіть та виправте причину нескінченного циклу.",
+  "hints": [
+    "Цикл while виконується поки умова true — що змінює i?",
+    "Потрібно додати i++ всередині циклу"
+  ],
+  "solution": "i++",
+  "errorPatterns": [],
+  "order": 5
+}

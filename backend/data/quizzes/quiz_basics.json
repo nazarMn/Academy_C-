@@ -1,0 +1,46 @@
+{
+  "id": "quiz_basics",
+  "title": "Основи C++",
+  "level": "beginner",
+  "icon": "🎯",
+  "xp": 100,
+  "questions": [
+    {
+      "question": "Яка функція є точкою входу у програму C++?",
+      "options": ["start()", "main()", "begin()", "run()"],
+      "correct": 1,
+      "explanation": "Виконання програми на C++ завжди починається з функції main()."
+    },
+    {
+      "question": "Який тип даних використовується для цілих чисел?",
+      "options": ["float", "char", "int", "string"],
+      "correct": 2,
+      "explanation": "int (integer) — тип для цілих чисел без дробової частини."
+    },
+    {
+      "question": "Що виводить: cout << 5 + 3 << endl;",
+      "options": ["5 + 3", "53", "8", "Помилка"],
+      "correct": 2,
+      "explanation": "cout виводить результат виразу 5+3, тобто 8."
+    },
+    {
+      "question": "Який оператор використовується для введення даних з клавіатури?",
+      "options": ["cout <<", "cin >>", "scanf()", "read()"],
+      "correct": 1,
+      "explanation": "cin >> зчитує дані з потоку введення (клавіатури)."
+    },
+    {
+      "question": "Що означає endl?",
+      "options": ["Кінець програми", "Перехід на новий рядок та очищення буфера", "Кінець рядка", "Пробіл"],
+      "correct": 1,
+      "explanation": "endl виводить символ нового рядка і очищає буфер виводу."
+    },
+    {
+      "question": "Як оголосити константу в C++?",
+      "options": ["var x = 5", "const int x = 5", "final int x = 5", "int const = 5"],
+      "correct": 1,
+      "explanation": "Ключове слово const перед типом робить змінну незмінною."
+    }
+  ],
+  "order": 10
+}

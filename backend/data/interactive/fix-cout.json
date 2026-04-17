@@ -1,0 +1,22 @@
+{
+  "id": "fix-cout",
+  "type": "interactive",
+  "title": "Виправ оператор виводу",
+  "level": "beginner",
+  "xp": 15,
+  "scenario": "Програма повинна виводити привітання, але оператор виводу використано неправильно. Компілятор видає помилку.",
+  "brokenCode": "#include <iostream>\nusing namespace std;\n\nint main() {\n    string name = \"World\";\n    cout >> \"Hello, \" >> name >> endl;\n    return 0;\n}",
+  "task": "Виправте оператор виводу cout.",
+  "hints": [
+    "cout використовує інший оператор, ніж cin",
+    "cout << — оператор вставки для виводу"
+  ],
+  "solution": "cout << \"Hello, \" << name << endl",
+  "errorPatterns": [
+    {
+      "match": "cout >>",
+      "hint": "cout використовує << для виводу, а не >>"
+    }
+  ],
+  "order": 1
+}

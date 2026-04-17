@@ -8,8 +8,8 @@ RUN npm ci --production
 # ─── Runtime Stage ───────────────────────────────────
 FROM node:20-alpine
 
-# Install g++ compiler for C++ code execution
-RUN apk add --no-cache g++ musl-dev
+# Install compilers for multi-language code execution
+RUN apk add --no-cache g++ musl-dev python3
 
 # Create non-root user for security
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup

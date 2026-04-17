@@ -49,6 +49,18 @@ class AuthError extends AppError {
   }
 }
 
+class UnauthorizedError extends AppError {
+  constructor(message = 'Неавторизований доступ') {
+    super(message, 401, 'UNAUTHORIZED');
+  }
+}
+
+class ForbiddenError extends AppError {
+  constructor(message = 'Доступ заборонено') {
+    super(message, 403, 'FORBIDDEN');
+  }
+}
+
 /**
  * Format compiler error messages for user-friendly display
  */
@@ -94,6 +106,8 @@ module.exports = {
   TimeoutError,
   NotFoundError,
   AuthError,
+  UnauthorizedError,
+  ForbiddenError,
   formatCompileError,
   errorHandler,
 };

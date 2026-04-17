@@ -51,21 +51,19 @@ window.BACKEND_URL = (() => {
   // Мобільне меню
   UI.initMobileMenu();
 
-  // Try to load lessons from API (enhances embedded data)
-  loadLessonsFromAPI().then(() => {
+  // Try to load lessons, quizzes, and projects from API (enhances embedded data)
+  Promise.all([
+    loadLessonsFromAPI(),
+    loadQuizzesFromAPI(),
+    loadProjectsFromAPI()
+  ]).then(() => {
     // Запускаємо роутер
     Router.init();
   });
 
-  /**
-   * Load lessons from backend API
-   * Falls back gracefully to embedded window.LESSONS_DATA
-   */
   async function loadLessonsFromAPI() {
     try {
-      const response = await fetch(`${window.BACKEND_URL}/api/lessons`, {
-        signal: AbortSignal.timeout(3000), // 3s timeout
-      });
+      const response = await fetch(`${window.BACKEND_URL}/api/lessons`, { signal: AbortSignal.timeout(3000) });
       if (!response.ok) throw new Error('API unavailable');
       const lessons = await response.json();
       if (Array.isArray(lessons) && lessons.length > 0) {
@@ -74,6 +72,34 @@ window.BACKEND_URL = (() => {
       }
     } catch (err) {
       console.log('[App] ℹ️ Using embedded lesson data (backend offline)');
+    }
+  }
+
+  async function loadQuizzesFromAPI() {
+    try {
+      const response = await fetch(`${window.BACKEND_URL}/api/quizzes`, { signal: AbortSignal.timeout(3000) });
+      if (!response.ok) throw new Error('API unavailable');
+      const data = await response.json();
+      if (Array.isArray(data) && data.length > 0) {
+        window.QUIZZES_DATA = data;
+        console.log(`[App] ✅ Loaded ${data.length} quizzes from API`);
+      }
+    } catch (err) {
+      console.log('[App] ℹ️ Using embedded quizzes data (backend offline)');
+    }
+  }
+
+  async function loadProjectsFromAPI() {
+    try {
+      const response = await fetch(`${window.BACKEND_URL}/api/projects`, { signal: AbortSignal.timeout(3000) });
+      if (!response.ok) throw new Error('API unavailable');
+      const data = await response.json();
+      if (Array.isArray(data) && data.length > 0) {
+        window.PROJECTS_DATA = data;
+        console.log(`[App] ✅ Loaded ${data.length} projects from API`);
+      }
+    } catch (err) {
+      console.log('[App] ℹ️ Using embedded projects data (backend offline)');
     }
   }
 })();

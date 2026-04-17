@@ -1,0 +1,47 @@
+﻿
+C:\Users\Nazar\Desktop\testcod\cpp\newfolder7\frontend\src\pages\LessonIDE.jsx
+   11:10  error    'executeCode' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                            no-unused-vars
+   20:46  error    'addXP' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                         no-unused-vars
+   40:9   error    'editorRef' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                     no-unused-vars
+  114:6   warning  React Hook useEffect has missing dependencies: 'loadCode' and 'userData'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\Nazar\Desktop\testcod\cpp\newfolder7\frontend\src\pages\Practice.jsx
+  197:9  error  Parsing error: Adjacent JSX elements must be wrapped in an enclosing tag
+
+C:\Users\Nazar\Desktop\testcod\cpp\newfolder7\frontend\src\pages\ProjectIDE.jsx
+    7:10  error    'executeCode' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                no-unused-vars
+   76:6   warning  React Hook useEffect has a missing dependency: 'activeCourse'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   react-hooks/exhaustive-deps
+   92:6   warning  React Hook useEffect has a missing dependency: 'activeCourse'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   react-hooks/exhaustive-deps
+   94:35  error    Compilation Skipped: Existing memoization could not be preserved
+
+React Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `activeCourse`, but the source dependencies were [project, removeCode]. Inferred different dependency than source.
+
+   92 |   }, [files, projectId, saveCode, project]);
+   93 |
+>  94 |   const handleReset = useCallback(() => {
+      |                                   ^^^^^^^
+>  95 |     if (project) {
+      | ^^^^^^^^^^^^^^^^^^
+>  96 |       const langConfig = getLanguageConfig(project.courseId || activeCourse || 'cpp');
+      | ^^^^^^^^^^^^^^^^^^
+>  97 |       const baseCode = project.starterCode || langConfig.starterCode;
+      | ^^^^^^^^^^^^^^^^^^
+>  98 |       const defaultState = [{ name: `main.${langConfig.extension}`, content: baseCode }];
+      | ^^^^^^^^^^^^^^^^^^
+>  99 |       setFiles(defaultState);
+      | ^^^^^^^^^^^^^^^^^^
+> 100 |       setActiveFile(defaultState[0].name);
+      | ^^^^^^^^^^^^^^^^^^
+> 101 |       removeCode(project.id);
+      | ^^^^^^^^^^^^^^^^^^
+> 102 |     }
+      | ^^^^^^^^^^^^^^^^^^
+> 103 |   }, [project, removeCode]);
+      | ^^^^ Could not preserve existing manual memoization
+  104 |
+  105 |   const handleRun = useCallback(() => {
+  106 |     if (!files || files.length === 0 || files.every(f => !f.content.trim())) {  react-hooks/preserve-manual-memoization
+  103:6   warning  React Hook useCallback has a missing dependency: 'activeCourse'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 react-hooks/exhaustive-deps
+
+тЬЦ 10 problems (6 errors, 4 warnings)
+

@@ -1,0 +1,27 @@
+{
+  "id": "file_manager",
+  "title": "Менеджер файлів",
+  "icon": "📁",
+  "level": "intermediate",
+  "xp": 400,
+  "description": "Консольна програма для роботи з файлами: запис, читання, пошук рядків, підрахунок слів та статистика.",
+  "difficulty": "Середній",
+  "skills": ["Файли", "fstream", "Рядки", "Обробка тексту"],
+  "requirements": [
+    "Записати текст у файл",
+    "Прочитати файл і вивести вміст",
+    "Підрахувати кількість рядків, слів, символів",
+    "Знайти і замінити рядок у файлі",
+    "Зберегти результат у новий файл"
+  ],
+  "steps": [
+    "Підключіть <fstream> та <sstream> для роботи з файлами.",
+    "Відкрийте файл для запису: ofstream file(\"назва.txt\");",
+    "Для читання: ifstream fin(\"назва.txt\"); string рядок; getline(fin, рядок);",
+    "Рахуйте слова через потоки: istringstream ss(рядок); string слово; while(ss >> слово) count++;",
+    "Для заміни: зчитайте весь файл, виконайте string::replace, збережіть.",
+    "Обробляйте помилки: if (!file.is_open()) { cerr << \"Помилка!\" << endl; }"
+  ],
+  "starterCode": "#include <iostream>\n#include <fstream>\n#include <string>\n#include <sstream>\nusing namespace std;\n\nvoid записатиФайл(string назва, string вміст) {\n    // TODO\n}\n\nstring прочитатиФайл(string назва) {\n    // TODO\n    return \"\";\n}\n\nint main() {\n    // TODO: меню\n    return 0;\n}",
+  "order": 30
+}

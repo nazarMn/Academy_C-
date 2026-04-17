@@ -1,0 +1,22 @@
+{
+  "id": "fix-semicolon",
+  "type": "interactive",
+  "title": "Знайди пропущену крапку з комою",
+  "level": "beginner",
+  "xp": 20,
+  "scenario": "Програма не компілюється. Компілятор каже \"expected ';'\" — десь пропущено крапку з комою.",
+  "brokenCode": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int a = 5\n    int b = 10;\n    cout << a + b << endl;\n    return 0;\n}",
+  "task": "Знайдіть та додайте пропущену крапку з комою.",
+  "hints": [
+    "Кожен оператор в C++ має завершуватись крапкою з комою",
+    "Подивіться на рядок з int a = 5"
+  ],
+  "solution": "int a = 5;",
+  "errorPatterns": [
+    {
+      "match": "int a = 5\n",
+      "hint": "Після int a = 5 пропущено крапку з комою"
+    }
+  ],
+  "order": 3
+}

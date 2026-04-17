@@ -1,0 +1,22 @@
+{
+  "id": "fix-cin",
+  "type": "interactive",
+  "title": "Виправ оператор вводу",
+  "level": "beginner",
+  "xp": 15,
+  "scenario": "Початківець написав програму для зчитування числа, але компілятор видає помилку. Оператор вводу використано неправильно.",
+  "brokenCode": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int number;\n    cout << \"Введіть число: \" << endl;\n    cin << number;\n    cout << \"Ви ввели: \" << number << endl;\n    return 0;\n}",
+  "task": "Знайдіть та виправте помилку в операторі вводу cin.",
+  "hints": [
+    "Подивіться на рядок з cin — який оператор там використовується?",
+    "cin використовує оператор >> (витягування), а не << (вставка)"
+  ],
+  "solution": "cin >> number",
+  "errorPatterns": [
+    {
+      "match": "cin <<",
+      "hint": "cin використовує >> для вводу, а не <<"
+    }
+  ],
+  "order": 0
+}

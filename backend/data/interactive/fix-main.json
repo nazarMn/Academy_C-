@@ -1,0 +1,27 @@
+{
+  "id": "fix-main",
+  "type": "interactive",
+  "title": "Виправ функцію main",
+  "level": "beginner",
+  "xp": 20,
+  "scenario": "Програма має дві помилки у визначенні функції main. Компілятор не може знайти точку входу.",
+  "brokenCode": "#include <iostream>\nusing namespace std;\n\nvoid Main {\n    cout << \"Hello!\" << endl;\n}",
+  "task": "Виправте оголошення функції main (тип повернення та синтаксис).",
+  "hints": [
+    "main повинна повертати int, а не void",
+    "Функція потребує дужки () та return 0",
+    "main пишеться з маленької літери: int main()"
+  ],
+  "solution": "int main()",
+  "errorPatterns": [
+    {
+      "match": "void Main",
+      "hint": "main пишеться маленькими літерами і повертає int"
+    },
+    {
+      "match": "Main {",
+      "hint": "Потрібні дужки: int main() {"
+    }
+  ],
+  "order": 4
+}
