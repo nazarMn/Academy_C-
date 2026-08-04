@@ -6,7 +6,8 @@ const User = require('./src/models/user.model');
 const Language = require('./src/models/language.model');
 require('dotenv').config();
 
-mongoose.connect(process.env.MONGO_URI).then(async () => {
+const mongoUri = process.env.MONGO_URI || process.env.MONGODB_URI;
+mongoose.connect(mongoUri).then(async () => {
   console.log('Connected to DB. Cleaning old schema data...');
   
   await Lesson.deleteMany({});

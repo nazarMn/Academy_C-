@@ -2,7 +2,8 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 
 async function wipe() {
-  await mongoose.connect(process.env.MONGODB_URI);
+  const mongoUri = process.env.MONGO_URI || process.env.MONGODB_URI;
+  await mongoose.connect(mongoUri);
   await mongoose.connection.collection('lessons').deleteMany({});
   await mongoose.connection.collection('quizzes').deleteMany({});
   await mongoose.connection.collection('practices').deleteMany({});
