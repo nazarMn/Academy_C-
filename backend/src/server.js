@@ -37,6 +37,7 @@ const subjectRoutes = require('./routes/subject.routes');
 const { initSocketIO } = require('./services/socket.service');
 
 const app = express();
+app.set('trust proxy', 1);
 const server = http.createServer(app);
 const PORT = process.env.PORT || 3001;
 const NODE_ENV = process.env.NODE_ENV || 'development';
