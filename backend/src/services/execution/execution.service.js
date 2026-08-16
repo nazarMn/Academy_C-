@@ -36,6 +36,10 @@ async function runWithTests(code, testCases = [], language = 'cpp') {
 
   logger.info('Execution', `Running ${testCases.length} test cases in ${language}`);
 
+  if (typeof engine.runWithTests === 'function') {
+    return await engine.runWithTests(code, testCases);
+  }
+
   const results = [];
   let status = 'accepted';
   let hasTimeout = false;
@@ -44,9 +48,6 @@ async function runWithTests(code, testCases = [], language = 'cpp') {
   let firstCompileError = null;
 
   for (const tc of testCases) {
-    // Note: This recompiles for every test case. For a production system 
-    // we would extend engines to support compile() + executeCompiled(), 
-    // but we use the unified run(code, input) interface.
     const result = await engine.run(code, tc.input || '');
 
     if (result.status === 'compile_error') {
