@@ -16,11 +16,7 @@ mongoose.connect(mongoUri).then(async () => {
   
   console.log('Cleared DB. Seeding from local files...');
   await seedDatabase();
-  
-  console.log('Elevating all existing users to ADMIN...');
-  const users = await User.updateMany({}, { role: 'admin' });
-  console.log(`Updated ${users.modifiedCount} users to admin role.`);
-  
+
   console.log('Done!');
   process.exit(0);
 });
