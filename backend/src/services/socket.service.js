@@ -1,10 +1,12 @@
 const { Server } = require('socket.io');
 const { logger } = require('../utils/logger');
+const { sanitizeCode, validateCode } = require('../utils/sanitizer');
 const sandbox = require('./sandbox.service');
 const fs = require('fs');
 const path = require('path');
 
 let io;
+const activeExecutions = new Set(); // Set of socket IDs currently running execution
 
 function initSocketIO(server) {
   io = new Server(server, {
@@ -19,10 +21,27 @@ function initSocketIO(server) {
 
     // Interactive execution handler
     socket.on('execute_interactive', async (data) => {
-      const { code, language } = data;
-      logger.info('Socket', `Interactive execution requested for ${language}`);
+      const { code: rawCode, language } = data || {};
+
+      // If already executing, kill previous run first
+      if (activeExecutions.has(socket.id)) {
+        socket.emit('kill');
+      }
+      activeExecutions.add(socket.id);
 
       try {
+        if (!rawCode || typeof rawCode !== 'string') {
+          socket.emit('output', `\r\n[Помилка]: Код не надано або має невірний формат.\r\n`);
+          socket.emit('execution_complete', { exitCode: 1 });
+          activeExecutions.delete(socket.id);
+          return;
+        }
+
+        const code = sanitizeCode(rawCode);
+        validateCode(code);
+
+        logger.info('Socket', `Interactive execution requested for ${language} by ${socket.id}`);
+
         if (language === 'cpp' || language === 'c') { // Support C and C++
           await handleCppInteractive(socket, code, language);
         } else if (language === 'python') {
@@ -35,13 +54,19 @@ function initSocketIO(server) {
         }
       } catch (err) {
         logger.error('Socket', `Error in interactive exec: ${err.message}`);
-        socket.emit('output', `\r\nError: ${err.message}\r\n`);
+        socket.emit('output', `\r\n[Помилка]: ${err.message}\r\n`);
         socket.emit('execution_complete', { exitCode: 1 });
+      } finally {
+        activeExecutions.delete(socket.id);
       }
     });
 
     socket.on('disconnect', () => {
       logger.info('Socket', `Client disconnected: ${socket.id}`);
+      if (activeExecutions.has(socket.id)) {
+        socket.emit('kill');
+        activeExecutions.delete(socket.id);
+      }
     });
   });
 }

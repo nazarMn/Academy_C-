@@ -56,6 +56,31 @@ function cleanup(dir) {
 }
 
 /**
+ * Get sanitized, minimal safe environment variables for sandboxed execution
+ */
+function getSafeEnv(customEnv = {}) {
+  const safeEnv = {
+    PATH: process.env.PATH || (isWindows ? 'C:\\Windows\\System32;C:\\Windows' : '/usr/bin:/bin'),
+    LANG: 'en_US.UTF-8',
+    LC_ALL: 'en_US.UTF-8',
+    TMPDIR: os.tmpdir(),
+    TEMP: os.tmpdir(),
+    TMP: os.tmpdir(),
+  };
+
+  if (isWindows) {
+    safeEnv.USERPROFILE = process.env.USERPROFILE || 'C:\\';
+    safeEnv.SystemRoot = process.env.SystemRoot || 'C:\\Windows';
+    safeEnv.COMSPEC = process.env.COMSPEC || 'C:\\Windows\\System32\\cmd.exe';
+    safeEnv.PATHEXT = process.env.PATHEXT || '.COM;.EXE;.BAT;.CMD';
+  } else {
+    safeEnv.HOME = '/tmp';
+  }
+
+  return { ...safeEnv, ...customEnv };
+}
+
+/**
  * Execute a command with security constraints (timeout, max output)
  * @param {string} command - Command to execute
  * @param {Array<string>} args - Arguments for the command
@@ -71,18 +96,8 @@ function exec(command, args = [], options = {}) {
     let spawnOptions = {
       stdio: ['pipe', 'pipe', 'pipe'],
       timeout: timeoutMs,
-      env: { ...process.env, ...(options.env || {}) },
+      env: getSafeEnv(options.env || {}),
     };
-
-    // On Linux (Render), apply resource limits
-    if (!isWindows) {
-      spawnOptions.env = {
-        ...spawnOptions.env,
-        // Restrict environment
-        HOME: '/tmp',
-        PATH: '/usr/bin:/bin',
-      };
-    }
 
     logger.debug('Sandbox', `Executing: ${command} ${args.join(' ')}`);
 
@@ -157,16 +172,8 @@ function execInteractive(command, args = [], socket, options = {}) {
 
     let spawnOptions = {
       stdio: ['pipe', 'pipe', 'pipe'],
-      env: { ...process.env, ...(options.env || {}) },
+      env: getSafeEnv(options.env || {}),
     };
-
-    if (!isWindows) {
-      spawnOptions.env = {
-        ...spawnOptions.env,
-        HOME: '/tmp',
-        PATH: '/usr/bin:/bin',
-      };
-    }
 
     const proc = spawn(command, args, spawnOptions);
 
