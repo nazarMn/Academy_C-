@@ -1,10 +1,9 @@
-import React, { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react';
+import React, { useEffect, useRef, useState, useCallback, forwardRef, useImperativeHandle } from 'react';
 import { Terminal } from 'xterm';
 import { FitAddon } from 'xterm-addon-fit';
 import { io } from 'socket.io-client';
 import 'xterm/css/xterm.css';
-import { Terminal as TerminalIcon, XCircle, Play, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui';
+import { Terminal as TerminalIcon, XCircle } from 'lucide-react';
 
 const InteractiveTerminal = forwardRef(({
   code,
@@ -17,15 +16,15 @@ const InteractiveTerminal = forwardRef(({
   const socketRef = useRef(null);
   const [isRunning, setIsRunning] = useState(false);
 
-  // Expose run and kill methods to parent
-  useImperativeHandle(ref, () => ({
-    run: () => {
-      startExecution();
-    },
-    kill: () => {
-      killExecution();
-    }
-  }));
+  const codeRef = useRef(code);
+  const langRef = useRef(language);
+  const onRunStatusChangeRef = useRef(onRunStatusChange);
+
+  useEffect(() => {
+    codeRef.current = code;
+    langRef.current = language;
+    onRunStatusChangeRef.current = onRunStatusChange;
+  }, [code, language, onRunStatusChange]);
 
   useEffect(() => {
     // Initialize Xterm.js
@@ -46,7 +45,7 @@ const InteractiveTerminal = forwardRef(({
       },
       fontFamily: 'Consolas, "Courier New", monospace',
       fontSize: 13,
-      convertEol: true, // Crucial for converting \n to \r\n automatically
+      convertEol: true,
     });
     const fitAddon = new FitAddon();
     terminal.loadAddon(fitAddon);
@@ -68,12 +67,12 @@ const InteractiveTerminal = forwardRef(({
     socket.on('execution_complete', ({ exitCode }) => {
       terminal.writeln(`\r\n\x1b[38;5;240m[Процес завершено з кодом ${exitCode}]\x1b[0m`);
       setIsRunning(false);
-      if (onRunStatusChange) onRunStatusChange(false);
+      if (onRunStatusChangeRef.current) onRunStatusChangeRef.current(false);
     });
 
     socket.on('disconnect', () => {
       setIsRunning(false);
-      if (onRunStatusChange) onRunStatusChange(false);
+      if (onRunStatusChangeRef.current) onRunStatusChangeRef.current(false);
     });
 
     const disposable = terminal.onData((data) => {
@@ -101,35 +100,51 @@ const InteractiveTerminal = forwardRef(({
     };
   }, []);
 
-  const startExecution = () => {
+  const startExecution = useCallback(() => {
     if (isRunning) return;
 
+    if (!xtermRef.current?.terminal) return;
     const { terminal } = xtermRef.current;
     terminal.clear();
     setIsRunning(true);
-    if (onRunStatusChange) onRunStatusChange(true);
+    if (onRunStatusChangeRef.current) onRunStatusChangeRef.current(true);
 
     if (socketRef.current && socketRef.current.connected) {
-      socketRef.current.emit('execute_interactive', { code, language });
+      socketRef.current.emit('execute_interactive', {
+        code: codeRef.current,
+        language: langRef.current || 'cpp'
+      });
     } else {
       terminal.writeln('\r\n\x1b[31m[Помилка: Немає з\'єднання з сервером]\x1b[0m');
       setIsRunning(false);
-      if (onRunStatusChange) onRunStatusChange(false);
+      if (onRunStatusChangeRef.current) onRunStatusChangeRef.current(false);
     }
-  };
+  }, [isRunning]);
 
-  const killExecution = () => {
+  const killExecution = useCallback(() => {
     if (socketRef.current && isRunning) {
       socketRef.current.emit('kill');
-      xtermRef.current.terminal.writeln('\r\n\x1b[31m[Виконання перервано]\x1b[0m');
+      xtermRef.current?.terminal?.writeln('\r\n\x1b[31m[Виконання перервано]\x1b[0m');
+      setIsRunning(false);
+      if (onRunStatusChangeRef.current) onRunStatusChangeRef.current(false);
     }
-  };
+  }, [isRunning]);
+
+  // Expose run and kill methods to parent
+  useImperativeHandle(ref, () => ({
+    run: () => {
+      startExecution();
+    },
+    kill: () => {
+      killExecution();
+    }
+  }), [startExecution, killExecution]);
 
   useEffect(() => {
     if (autoRun && code) {
       startExecution();
     }
-  }, [autoRun]);
+  }, [autoRun, startExecution, code]);
 
   return (
     <div className="flex flex-col h-full bg-surface-950">
