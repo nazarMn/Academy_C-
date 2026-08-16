@@ -4,7 +4,7 @@ const lessonSchema = new mongoose.Schema({
   id: { type: String, required: true }, // slug identifier e.g., 'cpp-variables'
   title: { type: String, required: true },
   courseId: { type: String, required: true, default: 'cpp' }, // Course grouping
-  type: { type: String, enum: ['academic', 'interactive'], required: true },
+  type: { type: String, enum: ['academic', 'interactive'], default: 'academic' },
   executionEngines: [{ type: String }], // e.g., ['cpp'], ['cpp', 'python'], or [] for theory mapping execution logic
   level: { type: String, default: 'beginner' },
   order: { type: Number, default: 0 },
@@ -39,6 +39,7 @@ const lessonSchema = new mongoose.Schema({
 
 // Avoid duplicate slugs
 lessonSchema.index({ id: 1 }, { unique: true });
+lessonSchema.index({ courseId: 1, order: 1 });
 
 const Lesson = mongoose.model('Lesson', lessonSchema);
 module.exports = Lesson;

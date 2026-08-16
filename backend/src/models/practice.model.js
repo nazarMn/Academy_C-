@@ -13,5 +13,7 @@ const practiceSchema = new mongoose.Schema({
   timestamps: true
 });
 
+practiceSchema.index({ courseId: 1, order: 1 });
+
 const Practice = mongoose.model('Practice', practiceSchema);
 module.exports = Practice;

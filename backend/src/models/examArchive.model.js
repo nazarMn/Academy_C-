@@ -20,4 +20,6 @@ const examArchiveSchema = new mongoose.Schema({
   timestamps: true,
 });
 
+examArchiveSchema.index({ subjectId: 1, order: 1 });
+
 module.exports = mongoose.model('ExamArchive', examArchiveSchema);

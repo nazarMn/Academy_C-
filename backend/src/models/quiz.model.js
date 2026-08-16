@@ -16,7 +16,9 @@ const quizSchema = new mongoose.Schema({
   questions: [questionSchema],
 }, {
   timestamps: true
-});
+ });
+
+quizSchema.index({ courseId: 1, order: 1 });
 
 const Quiz = mongoose.model('Quiz', quizSchema);
 module.exports = Quiz;
