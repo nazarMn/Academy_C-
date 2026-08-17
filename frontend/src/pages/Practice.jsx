@@ -11,9 +11,16 @@ import { executeCode } from '@/lib/api';
 
 const diffColors = {
   easy: { badge: 'success', label: 'Легко' },
+  beginner: { badge: 'success', label: 'Легко' },
   medium: { badge: 'warning', label: 'Середньо' },
+  intermediate: { badge: 'warning', label: 'Середньо' },
   hard: { badge: 'danger', label: 'Складно' },
+  advanced: { badge: 'danger', label: 'Складно' },
 };
+
+function getDifficultyInfo(diff) {
+  return diffColors[diff] || diffColors.easy;
+}
 
 export default function Practice() {
   const [tasks, setTasks] = useState([]);
@@ -24,6 +31,7 @@ export default function Practice() {
   const [testing, setTesting] = useState(false);
   const [testResults, setTestResults] = useState(null);
   const [outputTab, setOutputTab] = useState('terminal'); // 'terminal' | 'tests'
+  const [practicePanel, setPracticePanel] = useState('editor'); // 'desc' | 'editor' | 'output'
   const terminalRef = useRef(null);
 
   const { practiceCompleted, completePractice, saveCode, loadCode, removeCode, activeCourse } = useAppStore();
@@ -33,9 +41,15 @@ export default function Practice() {
     async function load() {
       try {
         const res = await fetch(`/api/practice?courseId=${activeCourse}`);
-        if (res.ok) setTasks(await res.json());
+        if (res.ok) {
+          const data = await res.json();
+          setTasks(Array.isArray(data) ? data : []);
+        } else {
+          setTasks([]);
+        }
       } catch (err) {
         console.error('Failed to load practice tasks', err);
+        setTasks([]);
       } finally {
         setLoadingTasks(false);
       }
@@ -128,9 +142,6 @@ export default function Practice() {
     }
   }, [code, selectedTask, activeCourse, practiceCompleted, handleComplete, practicePanel, toast]);
 
-  // Mobile panel for practice IDE
-  const [practicePanel, setPracticePanel] = useState('editor');
-
   // IDE mode
   if (selectedTask) {
     return (
@@ -146,8 +157,8 @@ export default function Practice() {
             </button>
             <span className="text-surface-700 hidden sm:inline">|</span>
             <h2 className="text-xs sm:text-sm font-semibold text-surface-100 truncate">{selectedTask.title}</h2>
-            <Badge color={diffColors[selectedTask.difficulty].badge} size="sm" className="hidden sm:flex">
-              {diffColors[selectedTask.difficulty].label}
+            <Badge color={getDifficultyInfo(selectedTask.difficulty).badge} size="sm" className="hidden sm:flex">
+              {getDifficultyInfo(selectedTask.difficulty).label}
             </Badge>
           </div>
           <Badge color="accent" size="sm">+{selectedTask.xp} XP</Badge>
@@ -323,7 +334,7 @@ export default function Practice() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 stagger">
           {tasks.map(task => {
             const done = practiceCompleted.includes(task.id);
-            const diff = diffColors[task.difficulty];
+            const diff = getDifficultyInfo(task.difficulty);
             return (
               <button
                 key={task.id}
