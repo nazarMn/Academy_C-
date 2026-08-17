@@ -50,6 +50,7 @@ export default function Practice() {
     setSelectedTask(task);
     setTestResults(null);
     setOutputTab('terminal');
+    terminalRef.current?.clear();
     const saved = loadCode(task.id);
     setCode(saved || task.starter);
   };
@@ -73,8 +74,12 @@ export default function Practice() {
 
   const handleRun = useCallback(() => {
     if (!code.trim()) return;
-    terminalRef.current?.run();
-  }, [code]);
+    setOutputTab('terminal');
+    if (practicePanel !== 'output') setPracticePanel('output');
+    setTimeout(() => {
+      terminalRef.current?.run();
+    }, 60);
+  }, [code, practicePanel]);
 
   const handleComplete = useCallback(() => {
     if (!selectedTask) return;

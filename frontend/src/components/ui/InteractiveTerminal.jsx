@@ -20,11 +20,26 @@ const InteractiveTerminal = forwardRef(({
   const langRef = useRef(language);
   const onRunStatusChangeRef = useRef(onRunStatusChange);
 
-  useEffect(() => {
-    codeRef.current = code;
-    langRef.current = language;
-    onRunStatusChangeRef.current = onRunStatusChange;
-  }, [code, language, onRunStatusChange]);
+  const setupSocketListeners = useCallback((socket, terminal) => {
+    socket.off('output');
+    socket.off('execution_complete');
+    socket.off('disconnect');
+
+    socket.on('output', (data) => {
+      terminal.write(data);
+    });
+
+    socket.on('execution_complete', ({ exitCode }) => {
+      terminal.writeln(`\r\n\x1b[38;5;240m[Процес завершено з кодом ${exitCode}]\x1b[0m`);
+      setIsRunning(false);
+      if (onRunStatusChangeRef.current) onRunStatusChangeRef.current(false);
+    });
+
+    socket.on('disconnect', () => {
+      setIsRunning(false);
+      if (onRunStatusChangeRef.current) onRunStatusChangeRef.current(false);
+    });
+  }, []);
 
   useEffect(() => {
     // Initialize Xterm.js
@@ -57,23 +72,9 @@ const InteractiveTerminal = forwardRef(({
 
     // Persistent socket setup
     const backendUrl = import.meta.env.DEV ? 'http://localhost:3001' : '';
-    const socket = io(backendUrl);
+    const socket = io(backendUrl, { autoConnect: true });
     socketRef.current = socket;
-
-    socket.on('output', (data) => {
-      terminal.write(data);
-    });
-
-    socket.on('execution_complete', ({ exitCode }) => {
-      terminal.writeln(`\r\n\x1b[38;5;240m[Процес завершено з кодом ${exitCode}]\x1b[0m`);
-      setIsRunning(false);
-      if (onRunStatusChangeRef.current) onRunStatusChangeRef.current(false);
-    });
-
-    socket.on('disconnect', () => {
-      setIsRunning(false);
-      if (onRunStatusChangeRef.current) onRunStatusChangeRef.current(false);
-    });
+    setupSocketListeners(socket, terminal);
 
     const disposable = terminal.onData((data) => {
       if (socketRef.current && socketRef.current.connected) {
@@ -98,28 +99,52 @@ const InteractiveTerminal = forwardRef(({
       terminal.dispose();
       if (socketRef.current) socketRef.current.disconnect();
     };
+  }, [setupSocketListeners]);
+
+  const clearTerminal = useCallback(() => {
+    if (xtermRef.current?.terminal) {
+      xtermRef.current.terminal.clear();
+      setIsRunning(false);
+      if (onRunStatusChangeRef.current) onRunStatusChangeRef.current(false);
+    }
   }, []);
 
   const startExecution = useCallback(() => {
     if (isRunning) return;
 
     if (!xtermRef.current?.terminal) return;
-    const { terminal } = xtermRef.current;
+    const { terminal, fitAddon } = xtermRef.current;
     terminal.clear();
+    fitAddon?.fit();
     setIsRunning(true);
     if (onRunStatusChangeRef.current) onRunStatusChangeRef.current(true);
 
-    if (socketRef.current && socketRef.current.connected) {
-      socketRef.current.emit('execute_interactive', {
+    const sendPayload = (sock) => {
+      sock.emit('execute_interactive', {
         code: codeRef.current,
         language: langRef.current || 'cpp'
       });
+    };
+
+    if (socketRef.current && socketRef.current.connected) {
+      sendPayload(socketRef.current);
     } else {
-      terminal.writeln('\r\n\x1b[31m[Помилка: Немає з\'єднання з сервером]\x1b[0m');
-      setIsRunning(false);
-      if (onRunStatusChangeRef.current) onRunStatusChangeRef.current(false);
+      const backendUrl = import.meta.env.DEV ? 'http://localhost:3001' : '';
+      const socket = io(backendUrl);
+      socketRef.current = socket;
+      setupSocketListeners(socket, terminal);
+
+      socket.once('connect', () => {
+        sendPayload(socket);
+      });
+
+      socket.once('connect_error', () => {
+        terminal.writeln('\r\n\x1b[31m[Помилка: Не вдалося підключитися до сервера виконання]\x1b[0m');
+        setIsRunning(false);
+        if (onRunStatusChangeRef.current) onRunStatusChangeRef.current(false);
+      });
     }
-  }, [isRunning]);
+  }, [isRunning, setupSocketListeners]);
 
   const killExecution = useCallback(() => {
     if (socketRef.current && isRunning) {
@@ -130,15 +155,18 @@ const InteractiveTerminal = forwardRef(({
     }
   }, [isRunning]);
 
-  // Expose run and kill methods to parent
+  // Expose run, kill and clear methods to parent
   useImperativeHandle(ref, () => ({
     run: () => {
       startExecution();
     },
     kill: () => {
       killExecution();
+    },
+    clear: () => {
+      clearTerminal();
     }
-  }), [startExecution, killExecution]);
+  }), [startExecution, killExecution, clearTerminal]);
 
   useEffect(() => {
     if (autoRun && code) {

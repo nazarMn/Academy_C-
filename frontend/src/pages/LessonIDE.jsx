@@ -67,6 +67,9 @@ export default function LessonIDE() {
   useEffect(() => {
     async function load() {
       setLoading(true);
+      setTestResults(null);
+      setOutputTab('terminal');
+      terminalRef.current?.clear();
 
       // Load current lesson
       try {
@@ -113,7 +116,7 @@ export default function LessonIDE() {
       }
     }, 1000);
     return () => clearTimeout(timer);
-  }, [code, lessonId, saveCode, lesson]);
+  }, [code, lessonId, saveCode, lesson, langConfig.starterCode]);
 
 
   // Run code
@@ -122,8 +125,12 @@ export default function LessonIDE() {
       toast.error('Напишіть код перед запуском.');
       return;
     }
-    terminalRef.current?.run();
-  }, [code, toast]);
+    setOutputTab('terminal');
+    if (activePanel !== 'output') setActivePanel('output');
+    setTimeout(() => {
+      terminalRef.current?.run();
+    }, 60);
+  }, [code, activePanel, toast]);
 
   // Complete lesson
   const handleComplete = useCallback(() => {
