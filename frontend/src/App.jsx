@@ -25,6 +25,7 @@ const ProjectIDE = lazy(() => import('@/pages/ProjectIDE'));
 const Profile = lazy(() => import('@/pages/Profile'));
 const ExamArchives = lazy(() => import('@/pages/ExamArchives'));
 const ExamArchiveIDE = lazy(() => import('@/pages/ExamArchiveIDE'));
+const Leaderboard = lazy(() => import('@/pages/Leaderboard'));
 
 // Lazy-Loaded Admin Pages (Loaded only when admin visits /admin)
 const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'));
@@ -82,6 +83,7 @@ export default function App() {
               <Route path="/profile" element={<Profile />} />
               <Route path="/archives" element={<ExamArchives />} />
               <Route path="/archives/:archiveId" element={<ExamArchiveIDE />} />
+              <Route path="/leaderboard" element={<Leaderboard />} />
             </Route>
 
             {/* Admin panel routes */}

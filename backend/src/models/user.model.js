@@ -65,6 +65,9 @@ const userSchema = new mongoose.Schema({
   timestamps: true
 });
 
+// Index for fast leaderboard ranking queries
+userSchema.index({ 'stats.xp': -1, 'stats.streak': -1 });
+
 // Hash password before saving
 userSchema.pre('save', async function () {
   if (!this.isModified('password')) return;

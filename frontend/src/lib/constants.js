@@ -34,13 +34,14 @@ export const ACHIEVEMENTS = [
 
 // ─── Navigation ───
 export const NAV_ITEMS = [
-  { path: '/dashboard', label: 'Головна',   icon: 'LayoutDashboard' },
-  { path: '/learn',     label: 'Навчання',  icon: 'GraduationCap' },
-  { path: '/practice',  label: 'Практика',  icon: 'Code2' },
-  { path: '/assess',    label: 'Тести',     icon: 'ClipboardCheck' },
-  { path: '/build',     label: 'Проєкти',   icon: 'Boxes' },
-  { path: '/archives',  label: 'Архів',     icon: 'Archive' },
-  { path: '/profile',   label: 'Профіль',   icon: 'User' },
+  { path: '/dashboard',   label: 'Головна',   icon: 'LayoutDashboard' },
+  { path: '/learn',       label: 'Навчання',  icon: 'GraduationCap' },
+  { path: '/practice',    label: 'Практика',  icon: 'Code2' },
+  { path: '/assess',      label: 'Тести',     icon: 'ClipboardCheck' },
+  { path: '/build',       label: 'Проєкти',   icon: 'Boxes' },
+  { path: '/archives',    label: 'Архів',     icon: 'Archive' },
+  { path: '/leaderboard', label: 'Рейтинг',   icon: 'Trophy' },
+  { path: '/profile',     label: 'Профіль',   icon: 'User' },
 ];
 
 // ─── Level color system ───

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Search, LayoutDashboard, BookOpen, Code2, ClipboardCheck,
-  Boxes, User, ArrowRight, Moon, Sun
+  Boxes, User, ArrowRight, Moon, Sun, Trophy, Archive
 } from 'lucide-react';
 import useAppStore from '@/stores/useAppStore';
 
@@ -12,6 +12,8 @@ const NAV_COMMANDS = [
   { id: 'practice', label: 'Практика', icon: Code2, path: '/practice', section: 'Навігація' },
   { id: 'quizzes', label: 'Тести', icon: ClipboardCheck, path: '/assess', section: 'Навігація' },
   { id: 'projects', label: 'Проєкти', icon: Boxes, path: '/build', section: 'Навігація' },
+  { id: 'archives', label: 'Архів', icon: Archive, path: '/archives', section: 'Навігація' },
+  { id: 'leaderboard', label: 'Рейтинг', icon: Trophy, path: '/leaderboard', section: 'Навігація' },
   { id: 'profile', label: 'Профіль', icon: User, path: '/profile', section: 'Навігація' },
 ];
 

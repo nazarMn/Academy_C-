@@ -34,6 +34,7 @@ const coursesRoutes = require('./routes/courses.routes');
 const adminRoutes = require('./routes/admin.routes');
 const examArchiveRoutes = require('./routes/examArchive.routes');
 const subjectRoutes = require('./routes/subject.routes');
+const leaderboardRoutes = require('./routes/leaderboard.routes');
 const { initSocketIO } = require('./services/socket.service');
 
 const app = express();
@@ -102,6 +103,7 @@ app.use('/api/courses', coursesRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/exam-archives', examArchiveRoutes);
 app.use('/api/subjects', subjectRoutes);
+app.use('/api/leaderboard', leaderboardRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
