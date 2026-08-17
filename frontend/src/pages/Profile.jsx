@@ -27,20 +27,53 @@ export default function Profile() {
   const {
     user, xp, level, streak, completedLessons, completedQuizzes,
     practiceCompleted, startedProjects, unlockedAchievements,
-    activityLog, lastActiveDate,
+    activityLog, lastActiveDate, activeCourse
   } = useAppStore();
 
   const levelInfo = getLevel(xp);
   const progressObj = getXPToNextLevel(xp);
-  const [totalLessons, setTotalLessons] = useState(25); // Fallback estimate
+
+  const [courseStats, setCourseStats] = useState({
+    lessons: [],
+    quizzes: [],
+    projects: [],
+    practice: []
+  });
 
   useEffect(() => {
-    fetch('/api/lessons')
-      .then(res => res.json())
-      .then(data => setTotalLessons(data.length))
-      .catch(() => {});
-  }, []);
+    async function loadStats() {
+      try {
+        const [l, q, prj, prac] = await Promise.all([
+          fetch(`/api/lessons?courseId=${activeCourse}`).then(r => r.json()),
+          fetch(`/api/quizzes?courseId=${activeCourse}`).then(r => r.json()),
+          fetch(`/api/projects?courseId=${activeCourse}`).then(r => r.json()),
+          fetch(`/api/practice?courseId=${activeCourse}`).then(r => r.json())
+        ]);
+        setCourseStats({
+          lessons: Array.isArray(l) ? l : [],
+          quizzes: Array.isArray(q) ? q : [],
+          projects: Array.isArray(prj) ? prj : [],
+          practice: Array.isArray(prac) ? prac : []
+        });
+      } catch (e) {
+        console.error('Failed to load profile course stats', e);
+      }
+    }
+    loadStats();
+  }, [activeCourse]);
+
   const memberSince = user.joinedAt ? new Date(user.joinedAt) : new Date();
+
+  // Computed course-specific completion
+  const courseLessonsDone = completedLessons.filter(id => courseStats.lessons.some(l => l.id === id)).length;
+  const coursePracticeDone = practiceCompleted.filter(id => courseStats.practice.some(p => p.id === id)).length;
+  const courseQuizzesDone = completedQuizzes.filter(id => courseStats.quizzes.some(q => q.id === id)).length;
+  const courseProjectsDone = startedProjects.filter(id => courseStats.projects.some(p => p.id === id)).length;
+
+  const totalLessons = courseStats.lessons.length;
+  const totalPractice = courseStats.practice.length;
+  const totalQuizzes = courseStats.quizzes.length;
+  const totalProjects = courseStats.projects.length;
 
   // Determine badge level tier
   let badgeTier = 'beginner';
@@ -160,10 +193,10 @@ export default function Profile() {
         <h2 className="text-base font-semibold text-surface-100 mb-4">Прогрес курсу</h2>
         <div className="space-y-3">
           {[
-            { label: 'Уроки', done: completedLessons.length, total: totalLessons, color: 'success' },
-            { label: 'Практика', done: practiceCompleted.length, total: 12, color: 'accent' },
-            { label: 'Тести', done: completedQuizzes.length, total: 6, color: 'warning' },
-            { label: 'Проєкти', done: startedProjects.length, total: 5, color: 'info' },
+            { label: 'Уроки', done: courseLessonsDone, total: totalLessons, color: 'success' },
+            { label: 'Практика', done: coursePracticeDone, total: totalPractice, color: 'accent' },
+            { label: 'Тести', done: courseQuizzesDone, total: totalQuizzes, color: 'warning' },
+            { label: 'Проєкти', done: courseProjectsDone, total: totalProjects, color: 'info' },
           ].map(item => (
             <div key={item.label}>
               <div className="flex items-center justify-between mb-1.5">
