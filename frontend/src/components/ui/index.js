@@ -6,3 +6,4 @@ export { ToastProvider, useToast } from './Toast';
 export { default as Skeleton } from './Skeleton';
 export { default as InteractiveTerminal } from './InteractiveTerminal';
 export { default as Lightbox } from './Lightbox';
+export { default as TestcaseDiff } from './TestcaseDiff';

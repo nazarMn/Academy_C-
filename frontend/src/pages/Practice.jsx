@@ -1,9 +1,9 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import {
   Code2, Play, RotateCcw, CheckCircle, Loader2, Star,
-  ChevronRight, Lock, Trophy
+  ChevronRight, Lock, Trophy, Terminal as TerminalIcon, CheckSquare
 } from 'lucide-react';
-import { Card, Badge, Button, ProgressBar, InteractiveTerminal } from '@/components/ui';
+import { Card, Badge, Button, ProgressBar, InteractiveTerminal, TestcaseDiff } from '@/components/ui';
 import { useToast } from '@/components/ui/Toast';
 import MonacoEditor from '@/components/editor/MonacoEditor';
 import useAppStore from '@/stores/useAppStore';
@@ -21,6 +21,9 @@ export default function Practice() {
   const [selectedTask, setSelectedTask] = useState(null);
   const [code, setCode] = useState('');
   const [running, setRunning] = useState(false);
+  const [testing, setTesting] = useState(false);
+  const [testResults, setTestResults] = useState(null);
+  const [outputTab, setOutputTab] = useState('terminal'); // 'terminal' | 'tests'
   const terminalRef = useRef(null);
 
   const { practiceCompleted, completePractice, saveCode, loadCode, removeCode, activeCourse } = useAppStore();
@@ -45,6 +48,8 @@ export default function Practice() {
 
   const handleSelect = (task) => {
     setSelectedTask(task);
+    setTestResults(null);
+    setOutputTab('terminal');
     const saved = loadCode(task.id);
     setCode(saved || task.starter);
   };
@@ -71,13 +76,52 @@ export default function Practice() {
     terminalRef.current?.run();
   }, [code]);
 
-  const handleComplete = () => {
+  const handleComplete = useCallback(() => {
     if (!selectedTask) return;
     const isNew = completePractice(selectedTask.id, selectedTask.xp);
     if (isNew) {
       toast.success(`Завдання виконано! +${selectedTask.xp} XP`);
     }
-  };
+  }, [selectedTask, completePractice, toast]);
+
+  const handleRunTests = useCallback(async () => {
+    if (!code.trim()) {
+      toast.error('Напишіть код перед перевіркою.');
+      return;
+    }
+    if (!selectedTask) return;
+
+    setTesting(true);
+    setOutputTab('tests');
+    if (practicePanel !== 'output') setPracticePanel('output');
+
+    try {
+      const testCases = [];
+      if (selectedTask.expectedOutput) {
+        testCases.push({ input: '', expectedOutput: selectedTask.expectedOutput });
+      }
+
+      const res = await executeCode(code, '', testCases.length > 0 ? testCases : null, activeCourse || 'cpp');
+      setTestResults(res);
+
+      if (res.status === 'accepted') {
+        toast.success('Тести успішно пройдено! 🚀');
+        if (!practiceCompleted.includes(selectedTask.id)) {
+          handleComplete();
+        }
+      } else if (res.status === 'wrong_answer') {
+        toast.error('Результат не збігається з очікуваним. Перегляньте Diff.');
+      } else if (res.status === 'compile_error') {
+        toast.error('Помилка компіляції коду.');
+      } else {
+        toast.error('Тести не пройдено.');
+      }
+    } catch (err) {
+      toast.error(err.message || 'Помилка перевірки тестів');
+    } finally {
+      setTesting(false);
+    }
+  }, [code, selectedTask, activeCourse, practiceCompleted, handleComplete, practicePanel, toast]);
 
   // Mobile panel for practice IDE
   const [practicePanel, setPracticePanel] = useState('editor');
@@ -164,9 +208,13 @@ export default function Practice() {
             </div>
             <div className="flex items-center justify-between px-2 sm:px-3 py-2 border-t border-surface-700/50 bg-surface-900/50">
               <div className="flex items-center gap-1.5 sm:gap-2">
-                <Button variant="primary" size="sm" onClick={handleRun} disabled={running}>
+                <Button variant="primary" size="sm" onClick={handleRun} disabled={running || testing}>
                   {running ? <Loader2 size={14} className="animate-spin" /> : <Play size={14} />}
                   <span className="hidden sm:inline">{running ? 'Запуск...' : 'Запустити'}</span>
+                </Button>
+                <Button variant="secondary" size="sm" onClick={handleRunTests} disabled={testing || running}>
+                  {testing ? <Loader2 size={14} className="animate-spin" /> : <CheckSquare size={14} className="text-accent" />}
+                  <span className="hidden sm:inline">{testing ? 'Перевірка...' : 'Перевірити'}</span>
                 </Button>
                 <Button variant="ghost" size="sm" onClick={handleReset} title="Скинути код до базового">
                   <RotateCcw size={14} />
@@ -180,17 +228,66 @@ export default function Practice() {
             </div>
           </div>
 
-          {/* Output */}
+          {/* Output / Tests Panel */}
           <div className={`
-            w-full lg:w-[350px] border-l border-surface-700/50 flex flex-col lg:flex-shrink-0 bg-surface-950
+            w-full lg:w-[380px] border-l border-surface-700/50 flex flex-col lg:flex-shrink-0 bg-surface-950
             ${practicePanel === 'output' ? 'flex' : 'hidden lg:flex'}
           `}>
-            <InteractiveTerminal
-              ref={terminalRef}
-              code={code}
-              language={activeCourse || 'cpp'}
-              onRunStatusChange={setRunning}
-            />
+            {/* Tabs Header */}
+            <div className="flex items-center justify-between px-3 py-1.5 bg-surface-900 border-b border-surface-700/50 shrink-0">
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setOutputTab('terminal')}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium transition-colors ${
+                    outputTab === 'terminal'
+                      ? 'bg-surface-800 text-surface-100 shadow-sm'
+                      : 'text-surface-500 hover:text-surface-300'
+                  }`}
+                >
+                  <TerminalIcon size={12} />
+                  <span>Термінал</span>
+                </button>
+
+                {testResults && (
+                  <button
+                    onClick={() => setOutputTab('tests')}
+                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium transition-colors ${
+                      outputTab === 'tests'
+                        ? 'bg-surface-800 text-accent shadow-sm'
+                        : 'text-surface-500 hover:text-surface-300'
+                    }`}
+                  >
+                    <CheckSquare size={12} />
+                    <span>Тести</span>
+                    <span className={`w-2 h-2 rounded-full ${
+                      testResults.status === 'accepted' ? 'bg-emerald-400' : 'bg-danger'
+                    }`} />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Tab Content */}
+            <div className="flex-1 min-h-0 overflow-hidden relative">
+              <div className={`h-full ${outputTab === 'terminal' ? 'block' : 'hidden'}`}>
+                <InteractiveTerminal
+                  ref={terminalRef}
+                  code={code}
+                  language={activeCourse || 'cpp'}
+                  onRunStatusChange={setRunning}
+                />
+              </div>
+
+              {outputTab === 'tests' && (
+                <div className="h-full overflow-y-auto p-3 bg-surface-950">
+                  <TestcaseDiff
+                    results={testResults?.testResults}
+                    status={testResults?.status}
+                    compileError={testResults?.compileError}
+                  />
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

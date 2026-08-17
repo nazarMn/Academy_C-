@@ -3,9 +3,9 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Play, RotateCcw, CheckCircle, ChevronRight,
   ChevronLeft, FileCode2, Terminal as TerminalIcon, BookOpen,
-  Loader2, AlertCircle
+  Loader2, AlertCircle, CheckSquare, Sparkles
 } from 'lucide-react';
-import { Button, Badge, InteractiveTerminal } from '@/components/ui';
+import { Button, Badge, InteractiveTerminal, TestcaseDiff } from '@/components/ui';
 import { useToast } from '@/components/ui/Toast';
 import useAppStore from '@/stores/useAppStore';
 import { executeCode } from '@/lib/api';
@@ -29,6 +29,9 @@ export default function LessonIDE() {
   // Editor
   const [code, setCode] = useState('');
   const [running, setRunning] = useState(false);
+  const [testing, setTesting] = useState(false);
+  const [testResults, setTestResults] = useState(null);
+  const [outputTab, setOutputTab] = useState('terminal'); // 'terminal' | 'tests'
   const terminalRef = useRef(null);
 
   // Panel visibility (mobile)
@@ -131,6 +134,46 @@ export default function LessonIDE() {
     }
   }, [lesson, completeLesson, toast]);
 
+  // Run tests with Diff Viewer
+  const handleRunTests = useCallback(async () => {
+    if (!code.trim()) {
+      toast.error('Напишіть код перед перевіркою.');
+      return;
+    }
+    if (!lesson) return;
+
+    setTesting(true);
+    setOutputTab('tests');
+    if (activePanel !== 'output') setActivePanel('output');
+
+    try {
+      const testCases = [];
+      if (lesson.expectedOutput) {
+        testCases.push({ input: '', expectedOutput: lesson.expectedOutput });
+      }
+
+      const res = await executeCode(code, '', testCases.length > 0 ? testCases : null, languageId, lesson.id);
+      setTestResults(res);
+
+      if (res.status === 'accepted') {
+        toast.success('Тести успішно пройдено! 🚀');
+        if (!completed) {
+          handleComplete();
+        }
+      } else if (res.status === 'wrong_answer') {
+        toast.error('Результат не збігається з очікуваним. Перегляньте Diff.');
+      } else if (res.status === 'compile_error') {
+        toast.error('Помилка компіляції коду.');
+      } else {
+        toast.error('Тести не пройдено.');
+      }
+    } catch (err) {
+      toast.error(err.message || 'Помилка перевірки тестів');
+    } finally {
+      setTesting(false);
+    }
+  }, [code, lesson, languageId, completed, handleComplete, activePanel, toast]);
+
   // Reset code
   const handleReset = useCallback(() => {
     if (lesson) {
@@ -138,7 +181,7 @@ export default function LessonIDE() {
       setCode(baseCode);
       removeCode(lessonId);
     }
-  }, [lesson, lessonId, removeCode]);
+  }, [lesson, lessonId, langConfig.starterCode, removeCode]);
 
   // Keyboard shortcuts (Ctrl+Enter from both window and Monaco custom event)
   useEffect(() => {
@@ -322,16 +365,33 @@ export default function LessonIDE() {
                   variant="primary"
                   size="sm"
                   onClick={handleRun}
-                  disabled={running}
+                  disabled={running || testing}
+                  title="Запустити код в терміналі (Ctrl+Enter)"
                 >
                   {running ? (
                     <Loader2 size={14} className="animate-spin" />
                   ) : (
                     <Play size={14} />
                   )}
-                  {running ? 'Запуск...' : 'Запустити'}
+                  <span className="hidden sm:inline">{running ? 'Запуск...' : 'Запустити'}</span>
                 </Button>
-                <kbd className="text-[10px] text-surface-600 bg-surface-800 px-1.5 py-0.5 rounded font-mono hidden sm:block">
+
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleRunTests}
+                  disabled={testing || running}
+                  title="Автоматично перевірити тести завдання"
+                >
+                  {testing ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : (
+                    <CheckSquare size={14} className="text-accent" />
+                  )}
+                  <span className="hidden sm:inline">{testing ? 'Перевірка...' : 'Перевірити'}</span>
+                </Button>
+
+                <kbd className="text-[10px] text-surface-600 bg-surface-800 px-1.5 py-0.5 rounded font-mono hidden md:block">
                   Ctrl+Enter
                 </kbd>
               </div>
@@ -349,20 +409,69 @@ export default function LessonIDE() {
             </div>
           </div>
 
-          {/* Terminal section */}
+          {/* Terminal / Test Diff section */}
           <div className={`
-            lg:h-[40%] flex-col
+            lg:h-[42%] flex-col bg-surface-950 border-t lg:border-t-0 border-surface-700/50
             ${activePanel === 'output' ? 'flex flex-1 lg:flex-none' : 'hidden lg:flex'}
           `}>
-            <InteractiveTerminal
-              ref={terminalRef}
-              code={code}
-              language={lesson?.executionEngines?.[0] || activeCourse || 'cpp'}
-              onRunStatusChange={setRunning}
-            />
+            {/* Output Sub-Header Tabs */}
+            <div className="flex items-center justify-between px-3 py-1.5 bg-surface-900 border-b border-surface-700/50 shrink-0">
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setOutputTab('terminal')}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium transition-colors ${
+                    outputTab === 'terminal'
+                      ? 'bg-surface-800 text-surface-100 shadow-sm'
+                      : 'text-surface-500 hover:text-surface-300'
+                  }`}
+                >
+                  <TerminalIcon size={12} />
+                  <span>Термінал</span>
+                </button>
+
+                {testResults && (
+                  <button
+                    onClick={() => setOutputTab('tests')}
+                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium transition-colors ${
+                      outputTab === 'tests'
+                        ? 'bg-surface-800 text-accent shadow-sm'
+                        : 'text-surface-500 hover:text-surface-300'
+                    }`}
+                  >
+                    <CheckSquare size={12} />
+                    <span>Тести</span>
+                    <span className={`w-2 h-2 rounded-full ${
+                      testResults.status === 'accepted' ? 'bg-emerald-400' : 'bg-danger'
+                    }`} />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Panel Content */}
+            <div className="flex-1 min-h-0 overflow-hidden relative">
+              <div className={`h-full ${outputTab === 'terminal' ? 'block' : 'hidden'}`}>
+                <InteractiveTerminal
+                  ref={terminalRef}
+                  code={code}
+                  language={lesson?.executionEngines?.[0] || activeCourse || 'cpp'}
+                  onRunStatusChange={setRunning}
+                />
+              </div>
+
+              {outputTab === 'tests' && (
+                <div className="h-full overflow-y-auto p-3 bg-surface-950">
+                  <TestcaseDiff
+                    results={testResults?.testResults}
+                    status={testResults?.status}
+                    compileError={testResults?.compileError}
+                  />
+                </div>
+              )}
+            </div>
 
             {/* Lesson navigation */}
-            <div className="flex items-center justify-between px-3 py-2 border-t border-surface-700/50 bg-surface-900/50">
+            <div className="flex items-center justify-between px-3 py-2 border-t border-surface-700/50 bg-surface-900/50 shrink-0">
               {prevLesson ? (
                 <Link
                   to={`/learn/${prevLesson.id}`}
